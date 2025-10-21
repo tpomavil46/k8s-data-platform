@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: superset
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://apache.github.io/superset
+    chart: superset
+    targetRevision: 0.12.11
+    helm:
+      values: |
+        postgresql:
+          enabled: false
+        externalDatabase:
+          host: 172.16.0.20
+          port: 5432
+          database: superset
+          user: superset
+          existingSecret: superset-postgres
+          existingSecretPasswordKey: password
+        service:
+          type: ClusterIP
+        ingress:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

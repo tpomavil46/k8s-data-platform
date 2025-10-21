@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jupyterhub
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://hub.jupyter.org/helm-chart/
+    chart: jupyterhub
+    targetRevision: 3.3.8
+    helm:
+      values: |
+        proxy:
+          service:
+            type: ClusterIP
+        singleuser:
+          storage:
+            dynamic:
+              storageClass: local-path
+            capacity: 10Gi
+        hub:
+          config:
+            Authenticator:
+              admin_users:
+                - admin
+            DummyAuthenticator:
+              password: jupyter
+            JupyterHub:
+              authenticator_class: dummy
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jupyter
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
