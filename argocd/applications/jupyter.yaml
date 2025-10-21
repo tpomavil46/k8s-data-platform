@@ -14,9 +14,6 @@ spec:
         proxy:
           service:
             type: ClusterIP
-          chp:
-            extraCommandLineFlags:
-              - --no-include-prefix
         singleuser:
           defaultUrl: "/lab"
           storage:
