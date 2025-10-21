@@ -8,17 +8,13 @@ spec:
   source:
     repoURL: https://kubeflow.github.io/spark-operator
     chart: spark-operator
-    targetRevision: 1.4.8
+    targetRevision: 2.3.0
     helm:
       values: |
-        sparkJobNamespace: spark-jobs
-        webhook:
-          enable: true
-        metrics:
-          enable: true
+        sparkJobNamespace: spark
   destination:
     server: https://kubernetes.default.svc
-    namespace: spark-operator
+    namespace: spark
   syncPolicy:
     automated:
       prune: true
