@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: kafka
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
   namespace: kafka
 spec:
   serviceName: kafka-headless
@@ -22,17 +26,18 @@ spec:
           name: kafka
         - containerPort: 9093
           name: controller
+        command:
+        - sh
+        - -c
+        - |
+          export KAFKA_NODE_ID=${HOSTNAME##*-}
+          export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${HOSTNAME}.kafka-headless.kafka.svc.cluster.local:9092
+          exec /etc/kafka/docker/run
         env:
-        - name: KAFKA_NODE_ID
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
         - name: KAFKA_PROCESS_ROLES
           value: "broker,controller"
         - name: KAFKA_LISTENERS
           value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
-        - name: KAFKA_ADVERTISED_LISTENERS
-          value: "PLAINTEXT://$(POD_NAME).kafka-headless.kafka.svc.cluster.local:9092"
         - name: KAFKA_CONTROLLER_LISTENER_NAMES
           value: "CONTROLLER"
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
@@ -49,10 +54,6 @@ spec:
           value: "/var/lib/kafka/data"
         - name: CLUSTER_ID
           value: "MkU3OEVBNTcwNTJENDM2Qk"
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
         volumeMounts:
         - name: data
           mountPath: /var/lib/kafka/data
