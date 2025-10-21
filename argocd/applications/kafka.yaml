@@ -17,8 +17,8 @@ spec:
           enabled: true
           size: 20Gi
         image:
-          repository: docker.io/bitnami/kafka
-          tag: 3.9.0-debian-12-r3
+          repository: ghcr.io/bitnami/kafka
+          tag: 3.9.0-debian-12-r0
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka
