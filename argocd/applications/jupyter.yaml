@@ -18,6 +18,7 @@ spec:
             extraCommandLineFlags:
               - --no-include-prefix
         singleuser:
+          defaultUrl: "/lab"
           storage:
             dynamic:
               storageClass: local-path
