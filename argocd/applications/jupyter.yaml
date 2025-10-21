@@ -23,23 +23,27 @@ spec:
               storageClass: local-path
             capacity: 10Gi
         hub:
+          extraEnv:
+            DUMMY_PASSWORD:
+              valueFrom:
+                secretKeyRef:
+                  name: jupyterhub-auth
+                  key: password
           config:
             Authenticator:
               admin_users:
                 - admin
             DummyAuthenticator:
-              password:
-                valueFrom:
-                  secretKeyRef:
-                    name: jupyterhub-auth
-                    key: password
+              password: "{{ os.environ.get('DUMMY_PASSWORD', 'jupyter') }}"
             JupyterHub:
               authenticator_class: dummy
               cookie_secret_file: /tmp/jupyterhub_cookie_secret
           extraConfig:
             trust_proxies: |
+              import os
               c.JupyterHub.trust_downstream_proxy = True
               c.JupyterHub.cookie_options = {'samesite': 'None', 'secure': True}
+              c.DummyAuthenticator.password = os.environ.get('DUMMY_PASSWORD', 'jupyter')
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
