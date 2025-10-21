@@ -28,6 +28,9 @@ spec:
               password: jupyter
             JupyterHub:
               authenticator_class: dummy
+          extraConfig:
+            trust_proxies: |
+              c.JupyterHub.trust_downstream_proxy = True
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
