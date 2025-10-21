@@ -13,13 +13,13 @@ spec:
       values: |
         postgresql:
           enabled: false
-        externalDatabase:
-          host: 172.16.0.20
-          port: 5432
-          database: superset
-          user: superset
-          existingSecret: superset-postgres
-          existingSecretPasswordKey: password
+        redis:
+          enabled: true
+          master:
+            persistence:
+              enabled: false
+        extraSecretEnv:
+          SQLALCHEMY_DATABASE_URI: postgresql://superset:superset123@172.16.0.20:5432/superset
         service:
           type: ClusterIP
         ingress:
