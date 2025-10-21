@@ -1,0 +1,31 @@
+# Secrets - NEVER commit these
+infrastructure/secrets/
+**/secrets/
+*.secret
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+*-secret.yaml
+*-secrets.yaml
+
+# Environment files
+.env
+.env.*
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
