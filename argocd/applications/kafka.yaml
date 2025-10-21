@@ -6,12 +6,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://d3nt0h.github.io/kafka-helm-charts
+    repoURL: https://charts.bitnami.com/bitnami
     chart: kafka
-    targetRevision: 18.0.1
+    targetRevision: 32.4.3
     helm:
       values: |
-        replicas: 3
+        controller:
+          replicaCount: 3
         persistence:
           enabled: true
           size: 20Gi
