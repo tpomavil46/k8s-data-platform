@@ -11,6 +11,9 @@ spec:
     targetRevision: 0.29.0
     helm:
       values: |
+        additionalConfigFiles:
+          config.properties: |
+            http-server.process-forwarded=true
         server:
           workers: 2
           coordinator:
@@ -20,8 +23,6 @@ spec:
               requests:
                 memory: "4Gi"
                 cpu: "1"
-            config:
-              http-server.process-forwarded: "true"
           worker:
             jvm:
               maxHeapSize: "4G"
@@ -29,8 +30,6 @@ spec:
               requests:
                 memory: "4Gi"
                 cpu: "1"
-            config:
-              http-server.process-forwarded: "true"
         service:
           type: ClusterIP
   destination:
@@ -38,7 +37,7 @@ spec:
     namespace: trino
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      prune: false
+      selfHeal: false
     syncOptions:
     - CreateNamespace=true
