@@ -11,9 +11,8 @@ spec:
     targetRevision: 0.29.0
     helm:
       values: |
-        additionalConfigFiles:
-          config.properties: |
-            http-server.process-forwarded=true
+        additionalConfigProperties:
+          - http-server.process-forwarded=true
         server:
           workers: 2
           coordinator:
@@ -37,7 +36,8 @@ spec:
     namespace: trino
   syncPolicy:
     automated:
-      prune: false
-      selfHeal: false
+      prune: true
+      selfHeal: true
     syncOptions:
     - CreateNamespace=true
+
