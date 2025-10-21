@@ -6,16 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: kafka
-    targetRevision: 32.4.3
-    helm:
-      values: |
-        controller:
-          replicaCount: 3
-        persistence:
-          enabled: true
-          size: 20Gi
+    repoURL: https://github.com/tpomaville/k8s-data-platform
+    targetRevision: main
+    path: kubernetes/kafka
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka
