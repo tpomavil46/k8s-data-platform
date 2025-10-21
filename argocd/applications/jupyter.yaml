@@ -28,7 +28,11 @@ spec:
               admin_users:
                 - admin
             DummyAuthenticator:
-              password: jupyter
+              password:
+                valueFrom:
+                  secretKeyRef:
+                    name: jupyterhub-auth
+                    key: password
             JupyterHub:
               authenticator_class: dummy
               cookie_secret_file: /tmp/jupyterhub_cookie_secret
