@@ -16,6 +16,9 @@ spec:
         persistence:
           enabled: true
           size: 20Gi
+        image:
+          repository: docker.io/bitnami/kafka
+          tag: 3.9.0-debian-12-r3
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka
@@ -24,4 +27,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
