@@ -11,6 +11,8 @@ spec:
     targetRevision: 32.4.3
     helm:
       values: |
+        image:
+          tag: latest
         controller:
           replicaCount: 3
         persistence:
