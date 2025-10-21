@@ -11,14 +11,21 @@ spec:
     targetRevision: 5.0.0
     helm:
       values: |
+        image:
+          tag: latest
         postgresql:
-          enabled: true
-          auth:
-            existingSecret: superset-secrets
-            secretKeys:
-              adminPasswordKey: postgresql-password
+          enabled: false
+        externalDatabase:
+          host: 172.16.0.20
+          port: 5432
+          user: superset
+          existingSecret: superset-secrets
+          existingSecretPasswordKey: postgresql-password
+          database: superset
         redis:
           enabled: true
+          image:
+            tag: latest
         service:
           type: ClusterIP
           port: 8088
