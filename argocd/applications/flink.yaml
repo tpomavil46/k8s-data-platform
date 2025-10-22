@@ -1,63 +1,20 @@
-apiVersion: flink.apache.org/v1beta1
-kind: FlinkDeployment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: basic-flink-example
-  namespace: argocd
+  name: flink
+  namespace: argocd   # <-- stays here always
 spec:
-  image: flink:1.20
-  serviceAccount: flink
-  flinkVersion: v1_20
-  flinkConfiguration:
-    taskmanager.numberOfTaskSlots: "1"
-    high-availability: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
-    high-availability.storageDir: file:///opt/flink/ha
-    state.checkpoints.dir: file:///opt/flink/checkpoints
-    state.savepoints.dir: file:///opt/flink/savepoints
-
-  jobManager:
-    resource:
-      cpu: 0.5
-      memory: 1536m
-    replicas: 1
-    podTemplate:
-      spec:
-        containers:
-          - name: flink-main-container
-            image: flink:1.20
-            volumeMounts:
-              - name: jm-ha
-                mountPath: /opt/flink/ha
-        volumes:
-          - name: jm-ha
-            persistentVolumeClaim:
-              claimName: flink-ha-storage
-
-  taskManager:
-    resource:
-      cpu: 0.5
-      memory: 1024m
-    replicas: 1
-
-  # Move initContainer and emptyDir into JM template so they’re valid
-  podTemplate:
-    spec:
-      containers:
-        - name: flink-main-container
-          image: flink:1.20
-      initContainers:
-        - name: fetch-postgres-driver
-          image: curlimages/curl:8.7.1
-          command: ["/bin/sh", "-lc"]
-          args:
-            - curl -fL -o /opt/flink/lib/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar
-          volumeMounts:
-            - name: flink-lib
-              mountPath: /opt/flink/lib
-      volumes:
-        - name: flink-lib
-          emptyDir: {}
-
-  job:
-    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
-    parallelism: 1
-    upgradeMode: stateless
+  project: default
+  source:
+    repoURL: https://github.com/tpomavil46/k8s-data-platform.git
+    targetRevision: main
+    path: apps/flink
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flink
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
