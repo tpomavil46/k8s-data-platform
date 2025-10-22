@@ -5,70 +5,56 @@ metadata:
   namespace: flink
 spec:
   image: flink:1.20
+  serviceAccount: flink
   flinkVersion: v1_20
-  serviceAccount: default
-
-  # Small asks to avoid scheduling failures
-  jobManager:
-    resource: { cpu: 0.25, memory: "768m" }
-    replicas: 1
-    podTemplate:
-      spec:
-        volumes:
-          - name: jm-ha
-            persistentVolumeClaim: { claimName: flink-ha-storage }
-        containers:
-          - name: main-container
-            volumeMounts:
-              - name: jm-ha
-                mountPath: /opt/flink/ha
-
-  taskManager:
-    resource: { cpu: 0.5, memory: "1024m" }
-    replicas: 1
-
-  # Pull Postgres JDBC driver (no custom image needed)
-  podTemplate:
-    spec:
-      initContainers:
-        - name: fetch-postgres-driver
-          image: curlimages/curl:8.7.1
-          command: ["/bin/sh","-lc"]
-          args:
-            - >
-              curl -fL -o /opt/flink/lib/postgresql.jar
-              https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar
-          volumeMounts:
-            - name: flink-lib
-              mountPath: /opt/flink/lib
-      volumes:
-        - name: flink-lib
-          emptyDir: {}
-
-  job:
-    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
-    parallelism: 1
-    upgradeMode: stateless
 
   flinkConfiguration:
-    high-availability: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
+    taskmanager.numberOfTaskSlots: "1"
+    high-availability.type: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
     high-availability.storageDir: file:///opt/flink/ha
     state.checkpoints.dir: file:///opt/flink/checkpoints
     state.savepoints.dir: file:///opt/flink/savepoints
     pipeline.classpaths: /opt/flink/lib/postgresql.jar
 
-  extraVolumeMounts:
-    - name: checkpoints
-      mountPath: /opt/flink/checkpoints
-    - name: savepoints
-      mountPath: /opt/flink/savepoints
-    - name: web-upload
-      mountPath: /opt/flink/usrlib
+  jobManager:
+    resource:
+      cpu: 0.5
+      memory: 1536m
+    replicas: 1
 
-  extraVolumes:
-    - name: checkpoints
-      persistentVolumeClaim: { claimName: flink-checkpoints }
-    - name: savepoints
-      persistentVolumeClaim: { claimName: flink-savepoints }
-    - name: web-upload
-      persistentVolumeClaim: { claimName: flink-web-upload }
+  taskManager:
+    resource:
+      cpu: 0.5
+      memory: 1024m
+    replicas: 1
+
+  podTemplate:
+    spec:
+      initContainers:
+        - name: fetch-postgres-driver
+          image: curlimages/curl:8.7.1
+          command: ["/bin/sh", "-lc"]
+          args:
+            - curl -fL -o /opt/flink/lib/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar
+          volumeMounts:
+            - name: flink-lib
+              mountPath: /opt/flink/lib
+      containers:
+        - name: flink-main-container
+          image: flink:1.20
+          volumeMounts:
+            - name: flink-lib
+              mountPath: /opt/flink/lib
+            - name: jm-ha
+              mountPath: /opt/flink/ha
+      volumes:
+        - name: flink-lib
+          emptyDir: {}
+        - name: jm-ha
+          persistentVolumeClaim:
+            claimName: flink-ha-storage
+
+  job:
+    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
+    parallelism: 1
+    upgradeMode: stateless
