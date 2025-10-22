@@ -28,17 +28,19 @@ spec:
       memory: 1024m
     replicas: 1
 
-  podTemplate:
+    podTemplate:
     spec:
       initContainers:
         - name: fetch-postgres-driver
           image: curlimages/curl:8.7.1
           command: ["/bin/sh", "-lc"]
           args:
-            - curl -fL -o /opt/flink/lib/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar
+            - >
+              curl -fL -o /tmp/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar &&
+              cp /tmp/postgresql.jar /flink-lib/
           volumeMounts:
             - name: flink-lib
-              mountPath: /opt/flink/lib
+              mountPath: /flink-lib
       containers:
         - name: flink-main-container
           image: flink:1.20
