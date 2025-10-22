@@ -13,6 +13,7 @@ spec:
     high-availability.storageDir: file:///opt/flink/ha
     state.checkpoints.dir: file:///opt/flink/checkpoints
     state.savepoints.dir: file:///opt/flink/savepoints
+
   jobManager:
     resource:
       cpu: 0.5
@@ -30,13 +31,19 @@ spec:
           - name: jm-ha
             persistentVolumeClaim:
               claimName: flink-ha-storage
+
   taskManager:
     resource:
       cpu: 0.5
       memory: 1024m
     replicas: 1
+
+  # Move initContainer and emptyDir into JM template so they’re valid
   podTemplate:
     spec:
+      containers:
+        - name: flink-main-container
+          image: flink:1.20
       initContainers:
         - name: fetch-postgres-driver
           image: curlimages/curl:8.7.1
@@ -49,6 +56,7 @@ spec:
       volumes:
         - name: flink-lib
           emptyDir: {}
+
   job:
     jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
     parallelism: 1
