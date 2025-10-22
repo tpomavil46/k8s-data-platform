@@ -2,10 +2,10 @@ apiVersion: flink.apache.org/v1beta1
 kind: FlinkDeployment
 metadata:
   name: basic-flink-example
-  namespace: flink
+  namespace: argocd
 spec:
   image: flink:1.20
-  serviceAccount: argocd
+  serviceAccount: flink
   flinkVersion: v1_20
   flinkConfiguration:
     taskmanager.numberOfTaskSlots: "1"
