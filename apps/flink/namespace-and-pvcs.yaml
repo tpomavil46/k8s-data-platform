@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flink
+  labels:
+    app.kubernetes.io/name: flink
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-ha-storage
+  namespace: flink
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: managed-nfs-storage
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-checkpoints
+  namespace: flink
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: managed-nfs-storage
+  resources: { requests: { storage: 5Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-savepoints
+  namespace: flink
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: managed-nfs-storage
+  resources: { requests: { storage: 5Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-web-upload
+  namespace: flink
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: managed-nfs-storage
+  resources: { requests: { storage: 1Gi } }
