@@ -4,6 +4,10 @@ metadata:
   name: superset
   namespace: argocd
 spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
