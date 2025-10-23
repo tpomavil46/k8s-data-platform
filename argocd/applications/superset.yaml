@@ -4,41 +4,42 @@ metadata:
   name: superset
   namespace: argocd
 spec:
-  project: default
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
+      parameters: []   # keep empty; use 'values' only
       values: |
-        image:
-          tag: latest
         postgresql:
           enabled: false
+
+        redis:
+          enabled: false
+
         externalDatabase:
           host: 172.16.0.20
           port: 5432
           user: superset
-          existingSecret: superset-secrets
-          existingSecretPasswordKey: postgresql-password
           database: superset
-        redis:
-          enabled: true
-          image:
-            tag: latest
-        service:
-          type: ClusterIP
-          port: 8088
-        supersetNode:
-          existingSecret: superset-secrets
-          existingSecretKeyMapping:
-            SUPERSET_SECRET_KEY: secret-key
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: superset
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+          passwordSecret: superset-externaldb
+          passwordSecretKey: db-password
+
+        web:
+          waitForDB: false
+          waitForRedis: false
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+
+        worker:
+          enabled: false
+          waitForDB: false
+          waitForRedis: false
+
+        scheduler:
+          enabled: false
+          waitForDB: false
+          waitForRedis: false
