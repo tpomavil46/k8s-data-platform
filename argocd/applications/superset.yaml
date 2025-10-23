@@ -10,64 +10,81 @@ spec:
     namespace: superset
 
   source:
-  repoURL: https://charts.bitnami.com/bitnami
-  chart: superset
-  targetRevision: 5.0.0
-  helm:
-    parameters: []
-    values: |
-      global:
-        imageRegistry: ghcr.io
-        security:
-          allowInsecureImages: true
-      image:
-        registry: ghcr.io
-        repository: bitnami/superset
-        tag: "5.0.0"
-        pullPolicy: IfNotPresent
-      postgresql:
-        enabled: false
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: superset
+    targetRevision: 5.0.0
+    helm:
+      parameters: []  # keep empty; use 'values' only
+      values: |
+        global:
+          # Force ALL images to come from GHCR, and allow non-default registries
+          imageRegistry: ghcr.io
+          security:
+            allowInsecureImages: true
+
+        # Superset image (avoid the -debian-12-rXX digest churn)
         image:
           registry: ghcr.io
-          repository: bitnami/postgresql
-          tag: 16.4.0
-        primary:
+          repository: bitnami/superset
+          tag: "5.0.0"
+          pullPolicy: IfNotPresent
+
+        # Disable bundled Postgres/Redis, but keep image stanzas so helpers don’t nil-deref
+        postgresql:
+          enabled: false
           image:
             registry: ghcr.io
             repository: bitnami/postgresql
             tag: 16.4.0
-      redis:
-        enabled: false
-        image:
-          registry: ghcr.io
-          repository: bitnami/redis
-          tag: 7.2.4
-      externalDatabase:
-        host: 172.16.0.20
-        port: 5432
-        user: superset
-        database: superset
-        passwordSecret: superset-externaldb
-        passwordSecretKey: db-password
-      web:
-        initContainers: []
-        waitForDB: false
-        waitForRedis: false
-        replicaCount: 1
-        resources:
-          requests:
-            cpu: 10m
-            memory: 128Mi
-      worker:
-        enabled: false
-        initContainers: []
-        waitForDB: false
-        waitForRedis: false
-      scheduler:
-        enabled: false
-        initContainers: []
-        waitForDB: false
-        waitForRedis: false
+          primary:
+            image:
+              registry: ghcr.io
+              repository: bitnami/postgresql
+              tag: 16.4.0
+
+        redis:
+          enabled: false
+          image:
+            registry: ghcr.io
+            repository: bitnami/redis
+            tag: 7.2.4
+
+        # External DB you created
+        externalDatabase:
+          host: 172.16.0.20
+          port: 5432
+          user: superset
+          database: superset
+          passwordSecret: superset-externaldb
+          passwordSecretKey: db-password
+
+        # Web only; no default wait-for-* init containers
+        web:
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+          service:
+            type: LoadBalancer
+            ports:
+              http: 8088
+
+        # Turn off worker/scheduler entirely (and make sure they have no init containers)
+        worker:
+          enabled: false
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
+
+        scheduler:
+          enabled: false
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
 
   syncPolicy:
     automated:
