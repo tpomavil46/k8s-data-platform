@@ -14,14 +14,11 @@ spec:
         executor: KubernetesExecutor
         postgresql:
           enabled: false
-        externalDatabase:
-          type: postgres
-          host: 172.16.0.20
-          port: 5432
-          database: airflow
-          user: airflow
-          passwordSecret: airflow-postgres
-          passwordSecretKey: password
+        data:
+          metadataSecretName: airflow-metadata
+          resultBackendSecretName: airflow-metadata
+          brokerUrlSecretName: airflow-broker-url
+        fernetKeySecretName: airflow-fernet-key
         webserver:
           service:
             type: ClusterIP
@@ -30,6 +27,25 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: airflow
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    name: airflow-metadata
+    namespace: airflow
+    jsonPointers:
+    - /data
+  - group: ""
+    kind: Secret
+    name: airflow-webserver-secret-key
+    namespace: airflow
+    jsonPointers:
+    - /data
+  - group: ""
+    kind: Secret
+    name: airflow-fernet-key
+    namespace: airflow
+    jsonPointers:
+    - /data
   syncPolicy:
     automated:
       prune: true
