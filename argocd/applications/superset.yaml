@@ -20,7 +20,7 @@ spec:
         image:
           registry: docker.io
           repository: bitnami/superset
-          tag: "5.0.0"          # avoid the fluctuating -debian-12-rXX
+          tag: 5.0.0-debian-12-r71
           pullPolicy: IfNotPresent
 
         postgresql:
