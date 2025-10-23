@@ -12,30 +12,23 @@ spec:
       parameters: []
       values: |
         global:
-          imageRegistry: ghcr.io
-          security:
-            allowInsecureImages: true  # REQUIRED when not using docker.io/bitnami
+          # stay on Docker Hub but authenticate so you don't hit rate limits
+          imageRegistry: docker.io
+          imagePullSecrets:
+            - dockerhub-creds
 
         image:
-          registry: ghcr.io
+          registry: docker.io
           repository: bitnami/superset
-          tag: "5.0.0"
+          tag: "5.0.0"          # avoid the fluctuating -debian-12-rXX
           pullPolicy: IfNotPresent
 
         postgresql:
           enabled: false
-          image:
-            registry: ghcr.io
-            repository: bitnami/postgresql
-            tag: 16.4.0
-
         redis:
           enabled: false
-          image:
-            registry: ghcr.io
-            repository: bitnami/redis
-            tag: 7.2.4
 
+        # Disable the chart's default "wait-for-*" init containers
         defaultInitContainers:
           waitForDB:
             enabled: false
