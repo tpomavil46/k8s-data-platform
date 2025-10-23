@@ -26,6 +26,7 @@ spec:
           passwordSecretKey: db-password
 
         web:
+          initContainers: []
           waitForDB: false
           waitForRedis: false
           replicaCount: 1
@@ -36,10 +37,12 @@ spec:
 
         worker:
           enabled: false
+          initContainers: []
           waitForDB: false
           waitForRedis: false
 
         scheduler:
           enabled: false
+          initContainers: []
           waitForDB: false
           waitForRedis: false
