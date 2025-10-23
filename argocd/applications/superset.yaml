@@ -22,11 +22,10 @@ spec:
             - dockerhub-creds
 
         image:
-          registry: docker.io
-          repository: bitnami/superset
-          tag: 5.0.0-debian-12-r71
+          repository: apache/superset
+          tag: 4.1.0
           pullPolicy: IfNotPresent
-
+          pullSecrests: []
         postgresql:
           enabled: false
         redis:
