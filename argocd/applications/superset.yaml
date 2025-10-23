@@ -22,8 +22,8 @@ spec:
             - dockerhub-creds
 
         image:
-          repository: apache/superset
-          tag: 4.1.0
+          repository: tpomavil46/superset
+          tag: 5.0.0
           pullPolicy: IfNotPresent
           pullSecrests: []
         postgresql:
