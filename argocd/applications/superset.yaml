@@ -5,43 +5,17 @@ metadata:
   namespace: argocd
 spec:
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: superset
-    targetRevision: 5.0.0
     helm:
-      parameters: []   # stay empty
       values: |
-        global:
-          imageRegistry: docker.io
-
-        # Pin the app image — remove any prior "image: tag: latest"
         image:
-          registry: docker.io
+          registry: ghcr.io
           repository: bitnami/superset
-          tag: 5.0.0-debian-12-r71
+          tag: "5.0.0"   # simple tag avoids the -debian-12-rXX that went missing
           pullPolicy: IfNotPresent
-
         postgresql:
           enabled: false
-          # keep these to satisfy helpers
-          image:
-            registry: docker.io
-            repository: bitnami/postgresql
-            tag: 16.4.0
-          primary:
-            image:
-              registry: docker.io
-              repository: bitnami/postgresql
-              tag: 16.4.0
-
         redis:
           enabled: false
-          # keep to satisfy helpers
-          image:
-            registry: docker.io
-            repository: bitnami/redis
-            tag: 7.2.4
-
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -49,8 +23,8 @@ spec:
           database: superset
           passwordSecret: superset-externaldb
           passwordSecretKey: db-password
-
         web:
+          initContainers: []
           waitForDB: false
           waitForRedis: false
           replicaCount: 1
@@ -58,17 +32,13 @@ spec:
             requests:
               cpu: 10m
               memory: 128Mi
-
-        # turn these OFF so no worker RS shows up
         worker:
           enabled: false
-
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
         scheduler:
           enabled: false
-
-        # make the init job schedulable on a tight control-plane
-        initJob:
-          resources:
-            requests:
-              cpu: 10m
-              memory: 128Mi
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
