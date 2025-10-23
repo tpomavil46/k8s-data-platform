@@ -8,49 +8,48 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: superset
+
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []  # keep empty; use values-only so defaults don’t sneak back
+      parameters: []   # keep empty; use values only
       values: |
-        # ---- Superset container image (Docker Hub, simple tag) ----
+        # Force all images to GHCR so nothing falls back to Docker Hub
+        global:
+          imageRegistry: ghcr.io
+
+        # Explicit Superset image
         image:
-          registry: docker.io
+          registry: ghcr.io
           repository: bitnami/superset
           tag: "5.0.0"
           pullPolicy: IfNotPresent
 
-        # ---- Disable built-in Postgres but keep image stanzas to satisfy helpers ----
+        # No in-cluster Postgres or Redis
         postgresql:
           enabled: false
+          # Satisfy helper templates even while disabled (prevents nil deref)
           image:
-            registry: docker.io
+            registry: ghcr.io
             repository: bitnami/postgresql
             tag: 16.4.0
           primary:
             image:
-              registry: docker.io
+              registry: ghcr.io
               repository: bitnami/postgresql
               tag: 16.4.0
 
-        # ---- Disable built-in Redis and satisfy helpers ----
         redis:
           enabled: false
+          # Satisfy helper templates even while disabled
           image:
-            registry: docker.io
+            registry: ghcr.io
             repository: bitnami/redis
             tag: 7.2.4
 
-        # ---- Turn off the chart's default wait-for-DB/Redis init containers everywhere ----
-        defaultInitContainers:
-          waitForDB:
-            enabled: false
-          waitForRedis:
-            enabled: false
-
-        # ---- Use your external Postgres ----
+        # Your external DB
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -59,29 +58,34 @@ spec:
           passwordSecret: superset-externaldb
           passwordSecretKey: db-password
 
-        # ---- Only web; keep it light ----
+        # Web only, no default wait-for-* init containers
         web:
+          initContainers: []
+          waitForDB: false
+          waitForRedis: false
           replicaCount: 1
           resources:
             requests:
               cpu: 10m
               memory: 128Mi
-          # not strictly needed because defaultInitContainers is disabled,
-          # but leaving these empty ensures no extras are added
-          initContainers: []
+          service:
+            type: LoadBalancer
+            ports:
+              http: 8088
 
+        # Turn off worker/scheduler (and make sure they have no init containers)
         worker:
           enabled: false
           initContainers: []
+          waitForDB: false
+          waitForRedis: false
 
         scheduler:
           enabled: false
           initContainers: []
+          waitForDB: false
+          waitForRedis: false
 
-        # keep service simple; Ingress or LB can be added later
-        service:
-          type: ClusterIP
-          port: 8088
   syncPolicy:
     automated:
       prune: true
