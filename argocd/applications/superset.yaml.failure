@@ -22,6 +22,7 @@ spec:
             - dockerhub-creds
 
         image:
+          registry: docker.io
           repository: tpomavil46/superset
           tag: 5.0.0
           pullPolicy: IfNotPresent
