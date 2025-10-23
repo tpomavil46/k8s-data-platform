@@ -1,9 +1,8 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: superset
-  namespace: argocd
 spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
@@ -26,7 +25,6 @@ spec:
           passwordSecretKey: db-password
 
         web:
-          initContainers: []
           waitForDB: false
           waitForRedis: false
           replicaCount: 1
@@ -37,12 +35,10 @@ spec:
 
         worker:
           enabled: false
-          initContainers: []
           waitForDB: false
           waitForRedis: false
 
         scheduler:
           enabled: false
-          initContainers: []
           waitForDB: false
           waitForRedis: false
