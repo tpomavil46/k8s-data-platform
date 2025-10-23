@@ -4,18 +4,34 @@ metadata:
   name: superset
   namespace: argocd
 spec:
+  project: default
   source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: superset
+    targetRevision: 5.0.0
     helm:
+      parameters: []   # use values-only to avoid hidden defaults
       values: |
         image:
           registry: ghcr.io
           repository: bitnami/superset
-          tag: "5.0.0"   # simple tag avoids the -debian-12-rXX that went missing
+          tag: "5.0.0"          # avoid vanished -debian-12-rXX sub-tags
           pullPolicy: IfNotPresent
+
+        # Do not deploy in-cluster Postgres/Redis
         postgresql:
           enabled: false
         redis:
           enabled: false
+
+        # Turn off the chart’s default "wait-for-*" init containers globally
+        defaultInitContainers:
+          waitForDB:
+            enabled: false
+          waitForRedis:
+            enabled: false
+
+        # External DB connection (secret must already exist)
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -23,6 +39,8 @@ spec:
           database: superset
           passwordSecret: superset-externaldb
           passwordSecretKey: db-password
+
+        # Minimal web; no extra init containers
         web:
           initContainers: []
           waitForDB: false
@@ -32,13 +50,25 @@ spec:
             requests:
               cpu: 10m
               memory: 128Mi
+
+        # Disable worker/scheduler
         worker:
           enabled: false
           initContainers: []
           waitForDB: false
           waitForRedis: false
+
         scheduler:
           enabled: false
           initContainers: []
           waitForDB: false
           waitForRedis: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
