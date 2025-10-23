@@ -7,7 +7,7 @@ spec:
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
-    targetRevision: 5.1.2
+    targetRevision: 5.0.0
     helm:
       parameters: []      # keep empty; values-only so defaults don’t sneak back
       values: |
