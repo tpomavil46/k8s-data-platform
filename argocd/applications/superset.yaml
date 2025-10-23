@@ -1,25 +1,32 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: superset
-  namespace: argocd
 spec:
-  project: default
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: superset
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []    # keep empty so no hidden overrides sneak in
+      parameters: []   # keep empty
       values: |
+        global:
+          imageRegistry: docker.io
+
         postgresql:
           enabled: false
+          image:
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: 16.4.0
+          primary:
+            image:
+              registry: docker.io
+              repository: bitnami/postgresql
+              tag: 16.4.0
 
         redis:
           enabled: false
+          image:
+            registry: docker.io
+            repository: bitnami/redis
+            tag: 7.2.4
 
         externalDatabase:
           host: 172.16.0.20
@@ -30,6 +37,7 @@ spec:
           passwordSecretKey: db-password
 
         web:
+          initContainers: []
           waitForDB: false
           waitForRedis: false
           replicaCount: 1
@@ -40,10 +48,12 @@ spec:
 
         worker:
           enabled: false
+          initContainers: []
           waitForDB: false
           waitForRedis: false
 
         scheduler:
           enabled: false
+          initContainers: []
           waitForDB: false
           waitForRedis: false
