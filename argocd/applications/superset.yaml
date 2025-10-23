@@ -38,6 +38,12 @@ spec:
             repository: bitnami/redis
             tag: 7.2.4
 
+        defaultInitContainers:
+          waitForDB:
+            enabled: false
+          waitForRedis:
+            enabled: false
+
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -47,9 +53,6 @@ spec:
           passwordSecretKey: db-password
 
         web:
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
           replicaCount: 1
           resources:
             requests:
@@ -58,19 +61,6 @@ spec:
 
         worker:
           enabled: false
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
 
         scheduler:
           enabled: false
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
-
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
