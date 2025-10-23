@@ -14,23 +14,24 @@ spec:
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []   # keep empty; use values only
+      parameters: []  # keep empty; use 'values' only
       values: |
-        # Force all images to GHCR so nothing falls back to Docker Hub
         global:
+          # Force ALL images to come from GHCR, and allow non-default registries
           imageRegistry: ghcr.io
+          security:
+            allowInsecureImages: true
 
-        # Explicit Superset image
+        # Superset image (avoid the -debian-12-rXX digest churn)
         image:
           registry: ghcr.io
           repository: bitnami/superset
           tag: "5.0.0"
           pullPolicy: IfNotPresent
 
-        # No in-cluster Postgres or Redis
+        # Disable bundled Postgres/Redis, but keep image stanzas so helpers don’t nil-deref
         postgresql:
           enabled: false
-          # Satisfy helper templates even while disabled (prevents nil deref)
           image:
             registry: ghcr.io
             repository: bitnami/postgresql
@@ -43,13 +44,12 @@ spec:
 
         redis:
           enabled: false
-          # Satisfy helper templates even while disabled
           image:
             registry: ghcr.io
             repository: bitnami/redis
             tag: 7.2.4
 
-        # Your external DB
+        # External DB you created
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -58,7 +58,7 @@ spec:
           passwordSecret: superset-externaldb
           passwordSecretKey: db-password
 
-        # Web only, no default wait-for-* init containers
+        # Web only; no default wait-for-* init containers
         web:
           initContainers: []
           waitForDB: false
@@ -73,7 +73,7 @@ spec:
             ports:
               http: 8088
 
-        # Turn off worker/scheduler (and make sure they have no init containers)
+        # Turn off worker/scheduler entirely (and make sure they have no init containers)
         worker:
           enabled: false
           initContainers: []
