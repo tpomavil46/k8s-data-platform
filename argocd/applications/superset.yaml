@@ -8,48 +8,42 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: superset
-
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []  # keep empty; use 'values' only
+      parameters: []   # keep empty; use values only
       values: |
-        global:
-          # Force ALL images to come from GHCR, and allow non-default registries
-          imageRegistry: ghcr.io
-          security:
-            allowInsecureImages: true
-
-        # Superset image (avoid the -debian-12-rXX digest churn)
         image:
-          registry: ghcr.io
+          # Docker Hub (Bitnami)
+          registry: docker.io
           repository: bitnami/superset
-          tag: "5.0.0"
+          tag: "5.0.0"         # simple tag; avoids the -debian-12-rXX variant
           pullPolicy: IfNotPresent
 
-        # Disable bundled Postgres/Redis, but keep image stanzas so helpers don’t nil-deref
+        # Disable embedded Postgres/Redis
         postgresql:
           enabled: false
           image:
-            registry: ghcr.io
+            registry: docker.io
             repository: bitnami/postgresql
             tag: 16.4.0
-          primary:
-            image:
-              registry: ghcr.io
-              repository: bitnami/postgresql
-              tag: 16.4.0
-
         redis:
           enabled: false
           image:
-            registry: ghcr.io
+            registry: docker.io
             repository: bitnami/redis
             tag: 7.2.4
 
-        # External DB you created
+        # Turn off the chart’s default init waiters globally
+        defaultInitContainers:
+          waitForDB:
+            enabled: false
+          waitForRedis:
+            enabled: false
+
+        # Your external DB
         externalDatabase:
           host: 172.16.0.20
           port: 5432
@@ -58,34 +52,18 @@ spec:
           passwordSecret: superset-externaldb
           passwordSecretKey: db-password
 
-        # Web only; no default wait-for-* init containers
+        # Only run the web; small requests so the scheduler stops complaining
         web:
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
           replicaCount: 1
           resources:
             requests:
-              cpu: 10m
-              memory: 128Mi
-          service:
-            type: LoadBalancer
-            ports:
-              http: 8088
+              cpu: 50m
+              memory: 256Mi
 
-        # Turn off worker/scheduler entirely (and make sure they have no init containers)
         worker:
           enabled: false
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
-
         scheduler:
           enabled: false
-          initContainers: []
-          waitForDB: false
-          waitForRedis: false
-
   syncPolicy:
     automated:
       prune: true
