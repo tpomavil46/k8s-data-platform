@@ -4,23 +4,26 @@ metadata:
   name: superset
   namespace: argocd
 spec:
-  project: default
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: superset
-
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []   # values-only so defaults don’t sneak back
+      parameters: []   # stay empty
       values: |
         global:
           imageRegistry: docker.io
 
+        # Pin the app image — remove any prior "image: tag: latest"
+        image:
+          registry: docker.io
+          repository: bitnami/superset
+          tag: 5.0.0-debian-12-r71
+          pullPolicy: IfNotPresent
+
         postgresql:
           enabled: false
+          # keep these to satisfy helpers
           image:
             registry: docker.io
             repository: bitnami/postgresql
@@ -33,16 +36,11 @@ spec:
 
         redis:
           enabled: false
+          # keep to satisfy helpers
           image:
             registry: docker.io
             repository: bitnami/redis
             tag: 7.2.4
-
-        defaultInitContainers:
-          waitForDB:
-            enabled: false
-          waitForRedis:
-            enabled: false
 
         externalDatabase:
           host: 172.16.0.20
@@ -53,14 +51,24 @@ spec:
           passwordSecretKey: db-password
 
         web:
+          waitForDB: false
+          waitForRedis: false
           replicaCount: 1
           resources:
             requests:
               cpu: 10m
               memory: 128Mi
 
+        # turn these OFF so no worker RS shows up
         worker:
           enabled: false
 
         scheduler:
           enabled: false
+
+        # make the init job schedulable on a tight control-plane
+        initJob:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
