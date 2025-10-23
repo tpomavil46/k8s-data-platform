@@ -1,3 +1,8 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: superset
+  namespace: argocd
 spec:
   project: default
   destination:
@@ -8,7 +13,7 @@ spec:
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []      # keep empty; values-only so defaults don’t sneak back
+      parameters: []    # keep empty so no hidden overrides sneak in
       values: |
         postgresql:
           enabled: false
