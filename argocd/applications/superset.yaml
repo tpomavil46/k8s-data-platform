@@ -1,10 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: superset
+  namespace: argocd
 spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
+
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []   # keep empty
+      parameters: []   # values-only so defaults don’t sneak back
       values: |
         global:
           imageRegistry: docker.io
@@ -57,3 +67,10 @@ spec:
           initContainers: []
           waitForDB: false
           waitForRedis: false
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
