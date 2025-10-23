@@ -9,7 +9,7 @@ spec:
     chart: superset
     targetRevision: 5.0.0
     helm:
-      parameters: []   # keep empty; use 'values' only
+      parameters: []   # IMPORTANT: keep this empty
       values: |
         postgresql:
           enabled: false
