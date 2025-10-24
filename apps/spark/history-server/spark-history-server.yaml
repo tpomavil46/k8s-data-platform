@@ -64,10 +64,12 @@ spec:
       - name: spark-history-server
         image: apache/spark:3.5.0
         command:
-          - "/bin/sh"
-          - "-c"
+          - "/opt/spark/sbin/start-history-server.sh"
         args:
-          - "/opt/spark/sbin/start-history-server.sh && tail -f /dev/null"
+          - "&&"
+          - "tail"
+          - "-f"
+          - "/dev/null"
         ports:
         - containerPort: 18080
           name: http
