@@ -62,7 +62,8 @@ spec:
       serviceAccountName: spark-history-server
       containers:
       - name: spark-history-server
-        image: ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.0
+        image: ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.1
+        imagePullPolicy: Always
         command:
           - "/bin/sh"
           - "-c"
