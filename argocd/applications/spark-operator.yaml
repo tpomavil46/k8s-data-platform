@@ -11,7 +11,8 @@ spec:
     targetRevision: 2.3.0
     helm:
       values: |
-        sparkJobNamespace: spark
+        namespaces: 
+          spark
   destination:
     server: https://kubernetes.default.svc
     namespace: spark
