@@ -4,3 +4,4 @@ resources:
   - secretstore.yaml
   - externalsecret-airflow-metadata.yaml
   - externalsecret-airflow-fernet.yaml
+  - externalsecret-airflow-connections.yaml

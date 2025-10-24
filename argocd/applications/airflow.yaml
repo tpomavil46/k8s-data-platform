@@ -24,6 +24,29 @@ spec:
             type: ClusterIP
         ingress:
           enabled: false
+        
+        # Inject connection secrets as environment variables
+        env:
+          - name: AIRFLOW_CONN_MINIO_DEFAULT
+            valueFrom:
+              secretKeyRef:
+                name: airflow-connections
+                key: AIRFLOW_CONN_MINIO_DEFAULT
+          - name: AIRFLOW_CONN_POSTGRES_DEFAULT
+            valueFrom:
+              secretKeyRef:
+                name: airflow-connections
+                key: AIRFLOW_CONN_POSTGRES_DEFAULT
+          - name: AIRFLOW_CONN_TRINO_DEFAULT
+            valueFrom:
+              secretKeyRef:
+                name: airflow-connections
+                key: AIRFLOW_CONN_TRINO_DEFAULT
+          - name: AIRFLOW_CONN_SPARK_DEFAULT
+            valueFrom:
+              secretKeyRef:
+                name: airflow-connections
+                key: AIRFLOW_CONN_SPARK_DEFAULT
   destination:
     server: https://kubernetes.default.svc
     namespace: airflow
