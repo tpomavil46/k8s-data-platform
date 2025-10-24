@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spark-history-server
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tpomavil46/k8s-data-platform.git
+    targetRevision: main
+    path: apps/spark/history-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: spark
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
