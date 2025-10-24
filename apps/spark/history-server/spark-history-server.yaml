@@ -60,6 +60,18 @@ spec:
         app: spark-history-server
     spec:
       serviceAccountName: spark-history-server
+      initContainers:
+      - name: download-s3-jars
+        image: busybox:1.36
+        command:
+          - sh
+          - -c
+          - |
+            wget -P /opt/spark/jars https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+            wget -P /opt/spark/jars https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
+        volumeMounts:
+        - name: spark-jars
+          mountPath: /opt/spark/jars
       containers:
       - name: spark-history-server
         image: apache/spark:3.5.0
@@ -76,6 +88,8 @@ spec:
           value: "true"
         - name: SPARK_HISTORY_OPTS
           value: "-Dspark.history.fs.logDirectory=s3a://spark-logs/"
+        - name: SPARK_DIST_CLASSPATH
+          value: "/opt/spark/jars-extra/*"
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
@@ -90,6 +104,8 @@ spec:
         - name: spark-conf
           mountPath: /opt/spark/conf/spark-defaults.conf
           subPath: spark-defaults.conf
+        - name: spark-jars
+          mountPath: /opt/spark/jars-extra
         resources:
           requests:
             memory: "512Mi"
@@ -101,6 +117,8 @@ spec:
       - name: spark-conf
         configMap:
           name: spark-history-server-conf
+      - name: spark-jars
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
