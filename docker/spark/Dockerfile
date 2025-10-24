@@ -19,11 +19,12 @@ RUN cd /opt/spark/jars && \
     # Iceberg
     curl -O https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.5_2.13/${ICEBERG_VERSION}/iceberg-spark-runtime-3.5_2.13-${ICEBERG_VERSION}.jar
 
-USER 185
+# Add default Spark configurations for Delta and Iceberg (as root, before switching users)
+RUN echo "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension,org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions" >> /opt/spark/conf/spark-defaults.conf && \
+    echo "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" >> /opt/spark/conf/spark-defaults.conf && \
+    echo "spark.sql.catalog.iceberg=org.apache.iceberg.spark.SparkCatalog" >> /opt/spark/conf/spark-defaults.conf && \
+    echo "spark.sql.catalog.iceberg.type=hadoop" >> /opt/spark/conf/spark-defaults.conf && \
+    echo "spark.sql.catalog.iceberg.warehouse=s3a://data/warehouse" >> /opt/spark/conf/spark-defaults.conf && \
+    chown -R 185:185 /opt/spark/conf
 
-# Add default Spark configurations for Delta and Iceberg
-RUN echo "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension,org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions" >> /opt/spark/conf/spark-defaults.conf.template && \
-    echo "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" >> /opt/spark/conf/spark-defaults.conf.template && \
-    echo "spark.sql.catalog.iceberg=org.apache.iceberg.spark.SparkCatalog" >> /opt/spark/conf/spark-defaults.conf.template && \
-    echo "spark.sql.catalog.iceberg.type=hadoop" >> /opt/spark/conf/spark-defaults.conf.template && \
-    echo "spark.sql.catalog.iceberg.warehouse=s3a://data/warehouse" >> /opt/spark/conf/spark-defaults.conf.template
+USER 185
