@@ -11,8 +11,13 @@ spec:
     targetRevision: 2.3.0
     helm:
       values: |
-        namespaces: 
-          spark
+        controller:
+          args:
+            - controller
+            - start
+            - --zap-log-level=info
+            - --zap-encoder=console
+            - --namespaces=spark
   destination:
     server: https://kubernetes.default.svc
     namespace: spark
