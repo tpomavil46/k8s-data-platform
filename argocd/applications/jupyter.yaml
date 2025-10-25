@@ -37,6 +37,10 @@ spec:
               client_secret: dummy  # Will be overridden by secret
               oauth_callback_url: https://jupyter.tpomaville.com/hub/oauth_callback
               allowed_organizations: []
+              allowed_users:
+                - tpomavil46
+              admin_users:
+                - tpomavil46
               scope:
                 - read:user
           extraEnv:
