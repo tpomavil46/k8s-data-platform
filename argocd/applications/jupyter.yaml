@@ -39,7 +39,8 @@ spec:
           extraConfig:
             trust_proxies: |
               c.JupyterHub.trust_downstream_proxy = True
-              c.JupyterHub.cookie_options = {'samesite': 'None', 'secure': True}
+              c.JupyterHub.cookie_options = {'samesite': 'Lax', 'secure': True}
+              c.JupyterHub.tornado_settings = {'cookie_options': {'samesite': 'Lax'}}
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
