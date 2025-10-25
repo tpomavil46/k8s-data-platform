@@ -18,8 +18,16 @@ spec:
           defaultUrl: "/lab"
           storage:
             dynamic:
-              storageClass: local-path
+              storageClass: managed-nfs-storage
+              pvcNameTemplate: claim-{username}
             capacity: 10Gi
+          startTimeout: 600
+          cpu:
+            limit: 2
+            guarantee: 0.1
+          memory:
+            limit: 2G
+            guarantee: 512M
         hub:
           config:
             JupyterHub:
