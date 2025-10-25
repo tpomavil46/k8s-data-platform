@@ -31,16 +31,32 @@ spec:
         hub:
           config:
             JupyterHub:
-              authenticator_class: nativeauthenticator.NativeAuthenticator
-            Authenticator:
-              admin_users:
-                - admin
-              allow_self_registration: true
+              authenticator_class: github
+            GitHubOAuthenticator:
+              client_id: dummy  # Will be overridden by secret
+              client_secret: dummy  # Will be overridden by secret
+              oauth_callback_url: https://jupyter.tpomaville.com/hub/oauth_callback
+              allowed_organizations: []
+              scope:
+                - read:user
+          extraEnv:
+            OAUTH_CLIENT_ID:
+              valueFrom:
+                secretKeyRef:
+                  name: jupyterhub-github-oauth
+                  key: client-id
+            OAUTH_CLIENT_SECRET:
+              valueFrom:
+                secretKeyRef:
+                  name: jupyterhub-github-oauth
+                  key: client-secret
           extraConfig:
-            trust_proxies: |
-              c.JupyterHub.trust_downstream_proxy = True
-              c.JupyterHub.cookie_options = {'samesite': 'Lax', 'secure': True}
-              c.JupyterHub.tornado_settings = {'cookie_options': {'samesite': 'Lax'}}
+            auth: |
+              from oauthenticator.github import GitHubOAuthenticator
+              c.JupyterHub.authenticator_class = GitHubOAuthenticator
+              c.GitHubOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID')
+              c.GitHubOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
+              c.GitHubOAuthenticator.oauth_callback_url = 'https://jupyter.tpomaville.com/hub/oauth_callback'
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
