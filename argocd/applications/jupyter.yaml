@@ -32,6 +32,10 @@ spec:
             limit: 4G
             guarantee: 512M
           serviceAccountName: jupyter-spark
+          lifecycleHooks:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "pip install --quiet pyspark"]
         hub:
           config:
             JupyterHub:
