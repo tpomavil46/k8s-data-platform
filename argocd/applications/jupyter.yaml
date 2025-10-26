@@ -16,6 +16,9 @@ spec:
             type: ClusterIP
         singleuser:
           defaultUrl: "/lab"
+          image:
+            name: jupyter/pyspark-notebook
+            tag: "spark-3.5.1"
           storage:
             dynamic:
               storageClass: managed-nfs-storage
@@ -26,15 +29,20 @@ spec:
             limit: 2
             guarantee: 0.1
           memory:
-            limit: 2G
+            limit: 4G
             guarantee: 512M
+          extraEnv:
+            SPARK_MASTER: "k8s://https://kubernetes.default.svc:443"
+            SPARK_DRIVER_MEMORY: "2g"
+            SPARK_EXECUTOR_MEMORY: "1g"
+          serviceAccountName: jupyter-spark
         hub:
           config:
             JupyterHub:
               authenticator_class: github
             GitHubOAuthenticator:
-              client_id: dummy  # Will be overridden by secret
-              client_secret: dummy  # Will be overridden by secret
+              client_id: dummy
+              client_secret: dummy
               oauth_callback_url: https://jupyter.tpomaville.com/hub/oauth_callback
               allowed_organizations: []
               allowed_users:
