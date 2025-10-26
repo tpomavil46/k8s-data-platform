@@ -11,11 +11,14 @@ metadata:
   namespace: jupyter
 rules:
 - apiGroups: [""]
-  resources: ["pods", "services", "configmaps"]
-  verbs: ["create", "get", "list", "watch", "delete"]
+  resources: ["pods", "services", "configmaps", "persistentvolumeclaims"]
+  verbs: ["create", "get", "list", "watch", "delete", "update", "patch"]
 - apiGroups: [""]
   resources: ["pods/log"]
-  verbs: ["get"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

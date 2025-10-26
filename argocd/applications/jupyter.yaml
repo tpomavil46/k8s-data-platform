@@ -18,7 +18,7 @@ spec:
           defaultUrl: "/lab"
           image:
             name: jupyter/pyspark-notebook
-            tag: "latest"  # Has PySpark pre-installed
+            tag: "python-3.11"
           storage:
             dynamic:
               storageClass: managed-nfs-storage
@@ -31,8 +31,6 @@ spec:
           memory:
             limit: 4G
             guarantee: 512M
-          extraEnv:
-            SPARK_OPTS: "--master k8s://https://kubernetes.default.svc:443"
           serviceAccountName: jupyter-spark
         hub:
           config:
