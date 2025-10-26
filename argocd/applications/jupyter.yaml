@@ -17,8 +17,8 @@ spec:
         singleuser:
           defaultUrl: "/lab"
           image:
-            name: jupyter/pyspark-notebook
-            tag: "spark-3.5.1"
+            name: ghcr.io/tpomavil46/jupyter-spark
+            tag: "4.0.1"
           storage:
             dynamic:
               storageClass: managed-nfs-storage
