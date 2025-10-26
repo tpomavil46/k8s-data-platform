@@ -1,0 +1,84 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: spark-delta-test-v2
+  namespace: default
+spec:
+  type: Python
+  mode: cluster
+  image: ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.1
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///opt/spark/work-dir/delta_test.py"
+  sparkVersion: "4.0.0"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    spark.sql.extensions: "io.delta.sql.DeltaSparkSessionExtension"
+    spark.sql.catalog.spark_catalog: "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    spark.eventLog.enabled: "true"
+    spark.eventLog.dir: "s3a://spark-logs/"
+    spark.hadoop.fs.s3a.endpoint: "http://172.16.0.20:9000"
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.hadoop.fs.s3a.connection.ssl.enabled: "false"
+    spark.hadoop.fs.s3a.aws.credentials.provider: "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
+  driver:
+    cores: 1
+    coreRequest: "100m"
+    memory: "512m"
+    serviceAccount: spark-operator-spark
+    envSecretKeyRefs:
+      AWS_ACCESS_KEY_ID:
+        name: spark-minio
+        key: access-key
+      AWS_SECRET_ACCESS_KEY:
+        name: spark-minio
+        key: secret-key
+    initContainers:
+    - name: create-script
+      image: busybox
+      command: 
+      - sh
+      - -c
+      - |
+        cat > /work-dir/delta_test.py << 'EOF'
+        from pyspark.sql import SparkSession
+        
+        spark = SparkSession.builder.appName("Delta Test").getOrCreate()
+        print("=" * 50)
+        print("Delta Lake Test")
+        print("=" * 50)
+        
+        data = [(1, "Alice", 29), (2, "Bob", 31), (3, "Charlie", 35)]
+        df = spark.createDataFrame(data, ["id", "name", "age"])
+        print("\nOriginal data:")
+        df.show()
+        
+        delta_path = "s3a://data/delta/people"
+        print(f"\nWriting to: {delta_path}")
+        df.write.format("delta").mode("overwrite").save(delta_path)
+        print("✅ Delta write successful!")
+        
+        df_read = spark.read.format("delta").load(delta_path)
+        print("\nRead back from Delta:")
+        df_read.show()
+        print("✅ Delta Lake test completed!")
+        spark.stop()
+        EOF
+      volumeMounts:
+      - name: work-dir
+        mountPath: /work-dir
+  executor:
+    cores: 1
+    coreRequest: "100m"
+    instances: 2
+    memory: "512m"
+    envSecretKeyRefs:
+      AWS_ACCESS_KEY_ID:
+        name: spark-minio
+        key: access-key
+      AWS_SECRET_ACCESS_KEY:
+        name: spark-minio
+        key: secret-key
+  volumes:
+  - name: work-dir
+    emptyDir: {}

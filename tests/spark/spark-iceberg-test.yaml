@@ -1,0 +1,121 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: spark-iceberg-test
+  namespace: default
+spec:
+  type: Python
+  mode: cluster
+  image: ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.1
+  imagePullPolicy: Always
+  mainApplicationFile: local:///tmp/iceberg_test.py
+  sparkVersion: "4.0.0"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    # Iceberg configuration
+    spark.sql.extensions: "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
+    spark.sql.catalog.iceberg: "org.apache.iceberg.spark.SparkCatalog"
+    spark.sql.catalog.iceberg.type: "hadoop"
+    spark.sql.catalog.iceberg.warehouse: "s3a://data/iceberg"
+    spark.sql.catalog.iceberg.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
+    # S3A configuration
+    spark.eventLog.enabled: "true"
+    spark.eventLog.dir: "s3a://spark-logs/"
+    spark.hadoop.fs.s3a.endpoint: "http://172.16.0.20:9000"
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.hadoop.fs.s3a.connection.ssl.enabled: "false"
+    spark.hadoop.fs.s3a.aws.credentials.provider: "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
+  driver:
+    cores: 1
+    coreRequest: "100m"
+    memory: "512m"
+    serviceAccount: spark-operator-spark
+    envSecretKeyRefs:
+      AWS_ACCESS_KEY_ID:
+        name: spark-minio
+        key: access-key
+      AWS_SECRET_ACCESS_KEY:
+        name: spark-minio
+        key: secret-key
+    configMaps:
+    - name: iceberg-test-script
+      path: /tmp
+  executor:
+    cores: 1
+    coreRequest: "100m"
+    instances: 2
+    memory: "512m"
+    envSecretKeyRefs:
+      AWS_ACCESS_KEY_ID:
+        name: spark-minio
+        key: access-key
+      AWS_SECRET_ACCESS_KEY:
+        name: spark-minio
+        key: secret-key
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iceberg-test-script
+  namespace: default
+data:
+  iceberg_test.py: |
+    from pyspark.sql import SparkSession
+    
+    # Create Spark session
+    spark = SparkSession.builder \
+        .appName("Iceberg Test") \
+        .getOrCreate()
+    
+    print("=" * 50)
+    print("Iceberg Test Starting...")
+    print("=" * 50)
+    
+    # Create sample data
+    data = [
+        (1, "Product A", 100.0),
+        (2, "Product B", 200.0),
+        (3, "Product C", 150.0)
+    ]
+    
+    df = spark.createDataFrame(data, ["id", "product", "price"])
+    
+    print("\nOriginal DataFrame:")
+    df.show()
+    
+    # Create Iceberg table
+    table_name = "iceberg.default.products"
+    print(f"\nCreating Iceberg table: {table_name}")
+    
+    df.writeTo(table_name).create()
+    
+    print("\n✅ Iceberg table created successfully!")
+    
+    # Read it back
+    print("\nReading Iceberg table back...")
+    df_read = spark.table(table_name)
+    
+    print("\nData read from Iceberg table:")
+    df_read.show()
+    
+    # Append new data
+    print("\nAppending new data to Iceberg table...")
+    new_data = [(4, "Product D", 175.0)]
+    df_new = spark.createDataFrame(new_data, ["id", "product", "price"])
+    df_new.writeTo(table_name).append()
+    
+    # Read updated table
+    df_updated = spark.table(table_name)
+    print("\nUpdated Iceberg table:")
+    df_updated.show()
+    
+    # Show table history (Iceberg feature)
+    print("\nIceberg table snapshots:")
+    spark.sql(f"SELECT * FROM {table_name}.snapshots").show(truncate=False)
+    
+    print("\n" + "=" * 50)
+    print("✅ Iceberg Test Completed Successfully!")
+    print("=" * 50)
+    
+    spark.stop()

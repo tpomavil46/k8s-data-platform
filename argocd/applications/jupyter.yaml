@@ -18,7 +18,7 @@ spec:
           defaultUrl: "/lab"
           image:
             name: jupyter/pyspark-notebook
-            tag: "python-3.11"
+            tag: "latest"
           storage:
             dynamic:
               storageClass: managed-nfs-storage

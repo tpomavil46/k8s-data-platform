@@ -1,0 +1,36 @@
+executor: KubernetesExecutor
+postgresql:
+  enabled: false
+data:
+  metadataSecretName: airflow-metadata
+  resultBackendSecretName: airflow-metadata
+  brokerUrlSecretName: airflow-broker-url
+fernetKeySecretName: airflow-fernet-key
+webserver:
+  service:
+    type: ClusterIP
+ingress:
+  enabled: false
+
+# Add connection secrets as environment variables
+env:
+  - name: AIRFLOW_CONN_MINIO_DEFAULT
+    valueFrom:
+      secretKeyRef:
+        name: airflow-connections
+        key: AIRFLOW_CONN_MINIO_DEFAULT
+  - name: AIRFLOW_CONN_POSTGRES_DEFAULT
+    valueFrom:
+      secretKeyRef:
+        name: airflow-connections
+        key: AIRFLOW_CONN_POSTGRES_DEFAULT
+  - name: AIRFLOW_CONN_TRINO_DEFAULT
+    valueFrom:
+      secretKeyRef:
+        name: airflow-connections
+        key: AIRFLOW_CONN_TRINO_DEFAULT
+  - name: AIRFLOW_CONN_SPARK_DEFAULT
+    valueFrom:
+      secretKeyRef:
+        name: airflow-connections
+        key: AIRFLOW_CONN_SPARK_DEFAULT

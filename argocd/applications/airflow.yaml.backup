@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://airflow.apache.org
+    chart: airflow
+    targetRevision: 1.16.0
+    helm:
+      values: |
+        executor: KubernetesExecutor
+        postgresql:
+          enabled: false
+        data:
+          metadataSecretName: airflow-metadata
+          resultBackendSecretName: airflow-metadata
+          brokerUrlSecretName: airflow-broker-url
+        fernetKeySecretName: airflow-fernet-key
+        webserver:
+          service:
+            type: ClusterIP
+        ingress:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: airflow
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    name: airflow-metadata
+    namespace: airflow
+    jsonPointers:
+    - /data
+  - group: ""
+    kind: Secret
+    name: airflow-webserver-secret-key
+    namespace: airflow
+    jsonPointers:
+    - /data
+  - group: ""
+    kind: Secret
+    name: airflow-fernet-key
+    namespace: airflow
+    jsonPointers:
+    - /data
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
