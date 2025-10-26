@@ -17,8 +17,8 @@ spec:
         singleuser:
           defaultUrl: "/lab"
           image:
-            name: ghcr.io/tpomavil46/jupyter-spark
-            tag: "4.0.1"
+            name: jupyter/pyspark-notebook
+            tag: "latest"  # Has PySpark pre-installed
           storage:
             dynamic:
               storageClass: managed-nfs-storage
@@ -32,9 +32,7 @@ spec:
             limit: 4G
             guarantee: 512M
           extraEnv:
-            SPARK_MASTER: "k8s://https://kubernetes.default.svc:443"
-            SPARK_DRIVER_MEMORY: "2g"
-            SPARK_EXECUTOR_MEMORY: "1g"
+            SPARK_OPTS: "--master k8s://https://kubernetes.default.svc:443"
           serviceAccountName: jupyter-spark
         hub:
           config:
