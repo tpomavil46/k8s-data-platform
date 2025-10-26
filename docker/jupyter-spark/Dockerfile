@@ -12,17 +12,23 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install JupyterLab and PySpark
+# Install JupyterLab core
 RUN pip3 install --no-cache-dir \
     jupyterlab==4.0.9 \
     notebook==7.0.6 \
-    jupyterhub==4.0.2 \
-    pyspark==4.0.0 \
+    jupyterhub==4.0.2
+
+# Install data science packages
+RUN pip3 install --no-cache-dir \
     pandas \
     matplotlib \
     seaborn \
-    delta-spark==3.2.1 \
-    pyiceberg
+    pyarrow
+
+# Install Delta Lake and Iceberg (already have PySpark from Spark installation)
+RUN pip3 install --no-cache-dir \
+    delta-spark==3.2.0 \
+    pyiceberg[s3fs,pyarrow]
 
 # Create spark user for JupyterHub
 RUN useradd -m -s /bin/bash -N -u 1000 jovyan && \
@@ -32,7 +38,7 @@ RUN useradd -m -s /bin/bash -N -u 1000 jovyan && \
 # Set SPARK_HOME and update PATH
 ENV SPARK_HOME=/opt/spark
 ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
-ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip:$PYTHONPATH
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip
 
 USER jovyan
 WORKDIR /home/jovyan
