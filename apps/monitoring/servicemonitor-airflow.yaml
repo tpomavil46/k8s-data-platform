@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: airflow-metrics
+  namespace: monitoring
+  labels:
+    app: airflow
+spec:
+  selector:
+    matchLabels:
+      component: webserver  # Airflow webserver exposes StatsD metrics
+  namespaceSelector:
+    matchNames:
+    - airflow  # Adjust to your Airflow namespace
+  endpoints:
+  - port: metrics  # Airflow Helm chart typically names this port "metrics"
+    path: /admin/metrics
+    interval: 30s
+---
+# If you're using Airflow with StatsD exporter
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: airflow-statsd-exporter
+  namespace: monitoring
+  labels:
+    app: airflow-statsd
+spec:
+  selector:
+    matchLabels:
+      component: statsd-exporter
+  namespaceSelector:
+    matchNames:
+    - airflow
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s

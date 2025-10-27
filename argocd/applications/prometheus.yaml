@@ -1,0 +1,124 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 58.0.0  # Use latest stable version, check: helm search repo prometheus-community/kube-prometheus-stack
+    helm:
+      values: |
+        # Prometheus Stack Configuration for Manufacturing Data Platform
+        
+        # Global settings
+        fullnameOverride: prometheus
+        
+        # Prometheus configuration
+        prometheus:
+          prometheusSpec:
+            # Retention period
+            retention: 30d
+            retentionSize: "50GB"
+            
+            # Resource limits
+            resources:
+              requests:
+                cpu: 500m
+                memory: 2Gi
+              limits:
+                cpu: 2000m
+                memory: 4Gi
+            
+            # Persistent storage
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: managed-nfs-storage  # Match your existing storage class
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 100Gi
+            
+            # Service monitors selector - will pick up all ServiceMonitors
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            
+            # Additional scrape configs for custom targets
+            additionalScrapeConfigs: []
+          
+          # Ingress for Prometheus UI (optional - can access via port-forward initially)
+          ingress:
+            enabled: false
+            # Uncomment when you want external access:
+            # enabled: true
+            # ingressClassName: nginx
+            # hosts:
+            #   - prometheus.tpomaville.com
+            # tls:
+            #   - secretName: prometheus-tls
+            #     hosts:
+            #       - prometheus.tpomaville.com
+        
+        # Grafana configuration (we'll configure this more in the next step)
+        grafana:
+          enabled: true
+          adminPassword: "changeme123"  # CHANGE THIS or use a secret
+          
+          persistence:
+            enabled: true
+            storageClassName: managed-nfs-storage
+            size: 10Gi
+          
+          ingress:
+            enabled: false
+            # Will enable with Keycloak SSO later
+          
+          # Pre-install some useful plugins
+          plugins:
+            - grafana-piechart-panel
+            - grafana-clock-panel
+            - grafana-simple-json-datasource
+        
+        # Alertmanager configuration
+        alertmanager:
+          alertmanagerSpec:
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: managed-nfs-storage
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+        
+        # Enable default exporters
+        nodeExporter:
+          enabled: true
+        
+        kubeStateMetrics:
+          enabled: true
+        
+        # Disable components we don't need yet
+        defaultRules:
+          create: true
+          rules:
+            alertmanager: true
+            etcd: false  # Disable if not monitoring etcd
+            kubeApiserver: true
+            kubeScheduler: false
+            kubeControllerManager: false
+            kubeProxy: false
+            node: true
+            prometheus: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

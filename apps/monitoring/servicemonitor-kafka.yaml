@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kafka-metrics
+  namespace: monitoring
+  labels:
+    app: kafka
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+  namespaceSelector:
+    matchNames:
+    - kafka  # Adjust to your Kafka namespace
+  endpoints:
+  - port: metrics  # Kafka JMX exporter port (typically 9308)
+    path: /metrics
+    interval: 30s
+---
+# Zookeeper metrics (if using)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: zookeeper-metrics
+  namespace: monitoring
+  labels:
+    app: zookeeper
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  namespaceSelector:
+    matchNames:
+    - kafka
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s

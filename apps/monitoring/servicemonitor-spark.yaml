@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spark-metrics
+  namespace: monitoring
+  labels:
+    app: spark
+spec:
+  selector:
+    matchLabels:
+      spark-role: driver  # Match Spark driver pods
+  namespaceSelector:
+    any: true  # Monitor Spark pods in any namespace
+  endpoints:
+  - port: metrics  # Spark exposes metrics on port 4040 by default
+    path: /metrics/prometheus
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spark-history-server
+  namespace: monitoring
+  labels:
+    app: spark-history
+spec:
+  selector:
+    matchLabels:
+      app: spark-history-server
+  namespaceSelector:
+    matchNames:
+    - jupyter  # Adjust to where your Spark History Server is deployed
+  endpoints:
+  - port: http
+    path: /metrics/prometheus
+    interval: 30s

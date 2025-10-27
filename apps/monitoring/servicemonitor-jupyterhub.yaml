@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: jupyterhub-metrics
+  namespace: monitoring
+  labels:
+    app: jupyterhub
+spec:
+  selector:
+    matchLabels:
+      component: hub
+  namespaceSelector:
+    matchNames:
+    - jupyter
+  endpoints:
+  - port: http
+    path: /hub/metrics
+    interval: 30s
+---
+# Monitor user notebook pods
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: jupyter-user-pods
+  namespace: monitoring
+  labels:
+    app: jupyter-users
+spec:
+  selector:
+    matchLabels:
+      component: singleuser-server
+  namespaceSelector:
+    matchNames:
+    - jupyter
+  podMetricsEndpoints:
+  - port: notebook-port
+    path: /metrics
+    interval: 30s
