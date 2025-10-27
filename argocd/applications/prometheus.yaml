@@ -20,18 +20,17 @@ spec:
         # Prometheus configuration
         prometheus:
           prometheusSpec:
-            # Retention period
             retention: 30d
             retentionSize: "50GB"
             
-            # Resource limits
+            # Reduced resource limits for your cluster
             resources:
               requests:
-                cpu: 500m
-                memory: 2Gi
+                cpu: 200m      # Reduced from 500m
+                memory: 1Gi    # Reduced from 2Gi
               limits:
-                cpu: 2000m
-                memory: 4Gi
+                cpu: 1000m     # Reduced from 2000m
+                memory: 2Gi    # Reduced from 4Gi
             
             # Persistent storage
             storageSpec:
