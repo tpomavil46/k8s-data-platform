@@ -22,6 +22,7 @@ spec:
           extraEnv:
             JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
             PYTHONPATH: ""
+            SPARKHOME: ""
           storage:
             dynamic:
               storageClass: managed-nfs-storage
@@ -38,7 +39,12 @@ spec:
           lifecycleHooks:
             postStart:
               exec:
-                command: ["/bin/sh", "-c", "pip install --quiet --upgrade --force-reinstall pyspark==4.0.1"]
+                command: 
+                  - /bin/sh
+                  - -c
+                  - |
+                    rm -rf /usr/local/spark*
+                    pip install --quiet pyspark==4.0.1
         hub:
           config:
             JupyterHub:
