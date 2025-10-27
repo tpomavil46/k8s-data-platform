@@ -19,6 +19,9 @@ spec:
           image:
             name: jupyter/pyspark-notebook
             tag: "latest"
+          extraEnv:
+            JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+            PYTHONPATH: ""
           storage:
             dynamic:
               storageClass: managed-nfs-storage
@@ -35,7 +38,7 @@ spec:
           lifecycleHooks:
             postStart:
               exec:
-                command: ["/bin/sh", "-c", "pip install --quiet pyspark"]
+                command: ["/bin/sh", "-c", "pip install --quiet --upgrade --force-reinstall pyspark==4.0.1"]
         hub:
           config:
             JupyterHub:
