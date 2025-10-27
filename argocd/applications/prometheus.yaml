@@ -10,6 +10,7 @@ spec:
     chart: kube-prometheus-stack
     targetRevision: 58.0.0  # Use latest stable version, check: helm search repo prometheus-community/kube-prometheus-stack
     helm:
+      skipCrds: true # CRDs should be managed separately - applied server-side
       values: |
         # Prometheus Stack Configuration for Manufacturing Data Platform
         
