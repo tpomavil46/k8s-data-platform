@@ -2,6 +2,9 @@ FROM ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.1
 
 USER root
 
+# FIRST: Remove old Spark 3.5.0
+RUN rm -rf /usr/local/spark* 
+
 # Install Python, pip, and JupyterLab dependencies
 RUN apt-get update && apt-get install -y \
     python3-pip \
@@ -26,7 +29,7 @@ RUN pip3 install --no-cache-dir \
     seaborn \
     pyarrow
 
-# Install Delta Lake for Spark 4.0 (not 3.2.0!)
+# Install Delta Lake for Spark 4.0
 RUN pip3 install --no-cache-dir \
     delta-spark==4.0.0 \
     pyiceberg[s3fs,pyarrow]
@@ -36,16 +39,12 @@ RUN useradd -m -s /bin/bash -N -u 1000 jovyan && \
     mkdir -p /home/jovyan && \
     chown -R jovyan:users /home/jovyan
 
-# Set SPARK_HOME and Java home
-ENV SPARK_HOME=/opt/spark
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
-
-# Don't set PYTHONPATH - let pip-installed pyspark handle it
-ENV PYSPARK_PYTHON=python3
-ENV PYSPARK_DRIVER_PYTHON=python3
-
 USER jovyan
 WORKDIR /home/jovyan
+
+# Set environment variables
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
