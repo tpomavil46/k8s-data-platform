@@ -21,5 +21,5 @@ spec:
   ignoreDifferences:
   - group: argoproj.io
     kind: Application
-    jqPathExpressions:
-    - .spec.source.helm.values
+    jsonPointers:
+    - /spec/source/helm/values
