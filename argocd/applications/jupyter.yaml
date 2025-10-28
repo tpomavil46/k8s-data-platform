@@ -36,6 +36,7 @@ spec:
           config:
             JupyterHub:
               authenticator_class: github
+              authenticate_prometheus: false
             GitHubOAuthenticator:
               client_id: dummy
               client_secret: dummy
