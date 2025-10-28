@@ -52,15 +52,15 @@ spec:
           # Ingress for Prometheus UI (optional - can access via port-forward initially)
           ingress:
             enabled: false
-            # Uncomment when you want external access:
-            # enabled: true
-            # ingressClassName: nginx
-            # hosts:
-            #   - prometheus.tpomaville.com
-            # tls:
-            #   - secretName: prometheus-tls
-            #     hosts:
-            #       - prometheus.tpomaville.com
+            Uncomment when you want external access:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - prometheus.tpomaville.com
+            tls:
+              - secretName: prometheus-tls
+                hosts:
+                  - prometheus.tpomaville.com
         
         # Grafana configuration (we'll configure this more in the next step)
         grafana:
