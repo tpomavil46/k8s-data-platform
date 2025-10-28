@@ -19,8 +19,7 @@ spec:
     syncOptions:
     - CreateNamespace=true
   ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jqPathExpressions:
-      - .spec.source.helm.values
-      
+  - group: argoproj.io
+    kind: Application
+    jqPathExpressions:
+    - .spec.source.helm.values
