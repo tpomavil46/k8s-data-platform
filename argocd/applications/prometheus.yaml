@@ -49,12 +49,12 @@ spec:
             # Additional scrape configs for custom targets
             additionalScrapeConfigs: []
           
-          # Ingress for Prometheus UI (optional - can access via port-forward initially)
+          # Ingress for Prometheus UI
           ingress:
-            enabled: false
-            Uncomment when you want external access:
             enabled: true
             ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: "letsencrypt-prod"
             hosts:
               - prometheus.tpomaville.com
             tls:
@@ -73,8 +73,16 @@ spec:
             size: 10Gi
           
           ingress:
-            enabled: false
-            # Will enable with Keycloak SSO later
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: "letsencrypt-prod"
+            hosts:
+              - grafana.tpomaville.com
+            tls:
+              - secretName: grafana-tls
+                hosts:
+                  - grafana.tpomaville.com
           
           # Pre-install some useful plugins
           plugins:
