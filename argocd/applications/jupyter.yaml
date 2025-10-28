@@ -47,6 +47,8 @@ spec:
                 - tpomavil46
               scope:
                 - read:user
+              metrics:
+                enabled: true
           extraEnv:
             OAUTH_CLIENT_ID:
               valueFrom:
