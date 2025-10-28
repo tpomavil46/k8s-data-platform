@@ -22,4 +22,4 @@ spec:
   - group: argoproj.io
     kind: Application
     jsonPointers:
-    - /spec/source/helm/values
+    - /spec/source/helm
