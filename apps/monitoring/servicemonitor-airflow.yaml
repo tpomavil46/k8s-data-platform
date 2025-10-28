@@ -13,7 +13,7 @@ spec:
     matchNames:
     - airflow  # Adjust to your Airflow namespace
   endpoints:
-  - port: metrics  # Airflow Helm chart typically names this port "metrics"
+  - port: airflow-ui  # Airflow Helm chart typically names this port "metrics"
     path: /admin/metrics
     interval: 30s
 ---

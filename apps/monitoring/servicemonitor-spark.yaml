@@ -29,7 +29,7 @@ spec:
       app: spark-history-server
   namespaceSelector:
     matchNames:
-    - jupyter  # Adjust to where your Spark History Server is deployed
+    - spark  # Adjust to where your Spark History Server is deployed
   endpoints:
   - port: http
     path: /metrics/prometheus
