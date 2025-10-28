@@ -67,9 +67,9 @@ spec:
               c.GitHubOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID')
               c.GitHubOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
               c.GitHubOAuthenticator.oauth_callback_url = 'https://jupyter.tpomaville.com/hub/oauth_callback'
-              metrics: |
-                # Allow unauthenticated access to metrics endpoint
-                c.JupyterHub.authenticate_prometheus = False
+            metrics: |
+              # Allow unauthenticated access to metrics endpoint
+              c.JupyterHub.authenticate_prometheus = False
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
