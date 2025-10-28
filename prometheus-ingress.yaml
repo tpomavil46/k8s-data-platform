@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # If you're using cert-manager
+    # Add any other annotations your ingress controller needs
+spec:
+  ingressClassName: nginx  # Adjust if you use a different ingress controller
+  rules:
+  - host: prometheus.tpomaville.com  # Change to your desired subdomain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-prometheus
+            port:
+              number: 9090
+  tls:
+  - hosts:
+    - prometheus.tpomaville.com
+    secretName: prometheus-tls
+---
+# Ingress for Grafana
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: grafana.tpomaville.com  # Change to your desired subdomain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-stack-grafana
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - grafana.tpomaville.com
+    secretName: grafana-tls
