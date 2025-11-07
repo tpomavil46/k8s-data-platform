@@ -10,6 +10,7 @@ spec:
     chart: jupyterhub
     targetRevision: 3.3.8
     helm:
+      skipSchemaValidation: true
       values: |
         proxy:
           service:
