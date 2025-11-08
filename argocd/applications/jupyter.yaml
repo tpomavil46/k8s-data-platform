@@ -20,6 +20,7 @@ spec:
           image:
             name: ghcr.io/tpomavil46/jupyter-spark
             tag: "4.0.1"
+            pullPolicy: Always
           storage:
             dynamic:
               storageClass: managed-nfs-storage
