@@ -5,7 +5,7 @@ USER root
 # FIRST: Remove old Spark 3.5.0
 RUN rm -rf /usr/local/spark* 
 
-# Install Python, pip, and JupyterLab dependencies
+# Install Python, pip, JupyterLab dependencies, and git
 RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libffi-dev \
     curl \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Install JupyterLab core
