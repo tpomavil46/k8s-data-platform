@@ -20,7 +20,9 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --no-cache-dir \
     jupyterlab==4.0.9 \
     notebook==7.0.6 \
-    jupyterhub==4.0.2
+    jupyterhub==4.0.2 \
+    ipython-sql \
+    sqlalchemy
 
 # Install PySpark 4.0.1 and compatible packages
 RUN pip3 install --no-cache-dir \
@@ -28,7 +30,10 @@ RUN pip3 install --no-cache-dir \
     pandas \
     matplotlib \
     seaborn \
-    pyarrow
+    pyarrow \
+    ipython-sql \
+    sqlalchemy \
+    sparkmagic
 
 # Install Delta Lake for Spark 4.0
 RUN pip3 install --no-cache-dir \
@@ -50,3 +55,6 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
 # Updated Sat Nov  8 12:11:51 AM PST 2025
+# Updated Sat Nov  8 10:37:11 AM PST 2025
+
+# echo "# Updated $(date)" >> ~/repos/k8s-data-platform/docker/jupyter-spark/Dockerfile

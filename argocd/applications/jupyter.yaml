@@ -19,7 +19,7 @@ spec:
           defaultUrl: "/lab"
           image:
             name: ghcr.io/tpomavil46/jupyter-spark
-            tag: "4.0.2"
+            tag: "4.0.3"
             pullPolicy: Always
           storage:
             dynamic:
