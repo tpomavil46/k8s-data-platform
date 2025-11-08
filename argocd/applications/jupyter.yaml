@@ -25,14 +25,6 @@ spec:
               storageClass: managed-nfs-storage
               pvcNameTemplate: claim-{username}
             capacity: 10Gi
-            extraVolumes:              # Move here (under storage)
-              - name: server-repos
-                hostPath:
-                  path: /home/tim/repos
-                  type: Directory
-            extraVolumeMounts:         # Move here (under storage)
-              - name: server-repos
-                mountPath: /home/jovyan/repos
           startTimeout: 600
           cpu:
             limit: 2
