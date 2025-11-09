@@ -15,6 +15,7 @@ spec:
         proxy:
           service:
             type: ClusterIP
+
         singleuser:
           defaultUrl: "/lab"
           image:
@@ -34,6 +35,12 @@ spec:
             limit: 4G
             guarantee: 512M
           serviceAccountName: jupyter-spark
+
+        # 👇 Disable the failing pre-pull hook so Argo can go Healthy
+        prePuller:
+          hook:
+            enabled: false
+
         hub:
           config:
             JupyterHub:
@@ -68,10 +75,6 @@ spec:
               c.GitHubOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID')
               c.GitHubOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
               c.GitHubOAuthenticator.oauth_callback_url = 'https://jupyter.tpomaville.com/hub/oauth_callback'
-        prePuller:
-          hook:
-            enabled: false
-  
   destination:
     server: https://kubernetes.default.svc
     namespace: jupyter
