@@ -2,57 +2,53 @@ FROM ghcr.io/tpomavil46/spark-s3-delta-iceberg:4.0.1
 
 USER root
 
-# FIRST: Remove old Spark 3.5.0
-RUN rm -rf /usr/local/spark* 
+# Remove old Spark 3.5.0
+RUN rm -rf /usr/local/spark*
 
-# Install Python, pip, JupyterLab dependencies, and git
+# System deps
 RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-dev \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    curl \
-    git \
+    python3-pip python3-dev build-essential \
+    libssl-dev libffi-dev curl git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install JupyterLab core
-RUN pip3 install --no-cache-dir \
-    jupyterlab==4.0.9 \
-    notebook==7.0.6 \
+# Make pip behave well on system Python
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Upgrade pip toolchain early
+RUN python3 -m pip install -U pip setuptools wheel
+
+# === Classic Jupyter stack that sparkmagic works with ===
+RUN pip3 install \
+    jupyterlab==3.6.7 \
+    notebook==6.5.7 \
     jupyterhub==4.0.2 \
     ipywidgets==8.1.2
 
-# Install PySpark 4.0.1 and compatible packages
-RUN pip3 install --no-cache-dir \
+# Core Python libs
+RUN pip3 install \
     pyspark==4.0.1 \
-    pandas \
-    matplotlib \
-    seaborn \
-    pyarrow \
-    ipython-sql \
-    sqlalchemy \
-    dbt-core
+    pandas matplotlib seaborn pyarrow \
+    ipython-sql sqlalchemy dbt-core
 
-RUN pip3 install --no-cache-dir --break-system-packages "sparkmagic==0.23.0"
+# Sparkmagic (known-good with classic stack)
+RUN pip3 install sparkmagic==0.20.5
 
-# Create sparkmagic config and point to Livy (adjust URL to your service)
-RUN mkdir -p /etc/sparkmagic && \
-    printf '%s\n' \
-'{' \
-'  "kernel_python_credentials": { "url": "http://livy:8998" },' \
-'  "kernel_scala_credentials":  { "url": "http://livy:8998" },' \
-'  "use_auto_viz": true,' \
-'  "heartbeat_refresh_seconds": 3,' \
-'  "heartbeat_retry_seconds": 1' \
-'}' > /etc/sparkmagic/config.json
-
+# Sparkmagic config (points to your Livy)
+RUN mkdir -p /etc/sparkmagic && cat > /etc/sparkmagic/config.json <<'JSON'
+{
+  "kernel_python_credentials": { "url": "http://livy:8998" },
+  "kernel_scala_credentials":  { "url": "http://livy:8998" },
+  "use_auto_viz": true,
+  "heartbeat_refresh_seconds": 3,
+  "heartbeat_retry_seconds": 1
+}
+JSON
 RUN chmod 644 /etc/sparkmagic/config.json
-
-# Make Jupyter/Sparkmagic see that config by default
 ENV SPARKMAGIC_CONF_DIR=/etc/sparkmagic
 
-# Register kernels (dynamic finder)
+# Register sparkmagic kernels
 RUN python3 - <<'PY'
 import os, site, subprocess
 site_pkgs = site.getsitepackages() + [site.getusersitepackages()]
@@ -71,28 +67,19 @@ for k in os.listdir(sm_path):
 print('Installed sparkmagic kernels from:', sm_path)
 PY
 
-# Install Delta Lake for Spark 4.0
-RUN pip3 install --no-cache-dir \
-    delta-spark==4.0.0 \
-    pyiceberg[s3fs,pyarrow]
+# Delta + Iceberg
+RUN pip3 install delta-spark==4.0.0 "pyiceberg[s3fs,pyarrow]"
 
-# Create spark user for JupyterHub
+# Create user
 RUN useradd -m -s /bin/bash -N -u 1000 jovyan && \
-    mkdir -p /home/jovyan && \
-    chown -R jovyan:users /home/jovyan
+    mkdir -p /home/jovyan && chown -R jovyan:users /home/jovyan
 
 USER jovyan
 WORKDIR /home/jovyan
 
-# Set environment variables
+# Env
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
-
-# echo "# Updated $(date)" >> ~/repos/k8s-data-platform/docker/jupyter-spark/Dockerfile
-
-# Updated Sat Nov  8 12:11:51 AM PST 2025
-# Updated Sat Nov  8 10:37:11 AM PST 2025
-# Updated Sun Nov  9 06:57:39 AM PST 2025
