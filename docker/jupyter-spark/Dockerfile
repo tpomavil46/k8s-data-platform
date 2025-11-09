@@ -32,7 +32,7 @@ RUN pip3 install --no-cache-dir \
     seaborn \
     pyarrow \
     ipython-sql \
-    sqlalchemy \
+    sqlalchemy<2.0 \
     dbt-core
 
 # Install Delta Lake for Spark 4.0
