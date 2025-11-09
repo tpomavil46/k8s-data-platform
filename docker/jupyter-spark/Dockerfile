@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --no-cache-dir \
     jupyterlab==4.0.9 \
     notebook==7.0.6 \
-    jupyterhub==4.0.2
+    jupyterhub==4.0.2 \
+    ipywidgets==8.1.2
 
 # Install PySpark 4.0.1 and compatible packages
 RUN pip3 install --no-cache-dir \
@@ -30,11 +31,45 @@ RUN pip3 install --no-cache-dir \
     seaborn \
     pyarrow \
     ipython-sql \
-    sqlalchemy==1.4.53 \
+    sqlalchemy \
     dbt-core
 
 RUN pip3 install --no-cache-dir \
-    sparkmagic
+    "sparkmagic>=0.20.5"
+
+# Create sparkmagic config and point to Livy (adjust URL to your service)
+RUN mkdir -p /etc/sparkmagic && \
+    printf '%s\n' \
+'{' \
+'  "kernel_python_credentials": { "url": "http://livy:8998" },' \
+'  "kernel_scala_credentials":  { "url": "http://livy:8998" },' \
+'  "use_auto_viz": true,' \
+'  "heartbeat_refresh_seconds": 3,' \
+'  "heartbeat_retry_seconds": 1' \
+'}' > /etc/sparkmagic/config.json
+
+RUN chmod 644 /etc/sparkmagic/config.json
+
+# Make Jupyter/Sparkmagic see that config by default
+ENV SPARKMAGIC_CONF_DIR=/etc/sparkmagic
+
+# Register kernels (same dynamic finder as above)
+RUN python3 - <<'PY'\n\
+import sys, os, site, subprocess\n\
+site_pkgs = site.getsitepackages() + [site.getusersitepackages()]\n\
+cand = [p for p in site_pkgs if os.path.isdir(p)]\n\
+sm_path = None\n\
+for base in cand:\n\
+    d = os.path.join(base, 'sparkmagic', 'kernels')\n\
+    if os.path.isdir(d): sm_path = d\n\
+if not sm_path:\n\
+    raise SystemExit('sparkmagic kernels path not found')\n\
+for k in os.listdir(sm_path):\n\
+    kp = os.path.join(sm_path, k)\n\
+    if os.path.isdir(kp):\n\
+        subprocess.check_call(['jupyter', 'kernelspec', 'install', '--sys-prefix', kp])\n\
+print('Installed sparkmagic kernels from:', sm_path)\n\
+PY
 
 # Install Delta Lake for Spark 4.0
 RUN pip3 install --no-cache-dir \
@@ -55,7 +90,9 @@ ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
-# Updated Sat Nov  8 12:11:51 AM PST 2025
-# Updated Sat Nov  8 10:37:11 AM PST 2025
 
 # echo "# Updated $(date)" >> ~/repos/k8s-data-platform/docker/jupyter-spark/Dockerfile
+
+# Updated Sat Nov  8 12:11:51 AM PST 2025
+# Updated Sat Nov  8 10:37:11 AM PST 2025
+# Updated Sun Nov  9 06:57:39 AM PST 2025
