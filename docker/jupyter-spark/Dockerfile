@@ -20,9 +20,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --no-cache-dir \
     jupyterlab==4.0.9 \
     notebook==7.0.6 \
-    jupyterhub==4.0.2 \
-    ipython-sql \
-    sqlalchemy
+    jupyterhub==4.0.2
 
 # Install PySpark 4.0.1 and compatible packages
 RUN pip3 install --no-cache-dir \
@@ -32,7 +30,7 @@ RUN pip3 install --no-cache-dir \
     seaborn \
     pyarrow \
     ipython-sql \
-    sqlalchemy<2.0 \
+    sqlalchemy==1.4.53 \
     dbt-core
 
 # Install Delta Lake for Spark 4.0
