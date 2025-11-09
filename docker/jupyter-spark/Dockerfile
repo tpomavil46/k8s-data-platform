@@ -34,8 +34,7 @@ RUN pip3 install --no-cache-dir \
     sqlalchemy \
     dbt-core
 
-RUN pip3 install --no-cache-dir \
-    "sparkmagic>=0.20.5"
+RUN pip3 install --no-cache-dir --break-system-packages "sparkmagic==0.23.0"
 
 # Create sparkmagic config and point to Livy (adjust URL to your service)
 RUN mkdir -p /etc/sparkmagic && \
