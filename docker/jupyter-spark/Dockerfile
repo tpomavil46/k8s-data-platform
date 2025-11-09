@@ -32,6 +32,11 @@ RUN pip3 install \
     pandas matplotlib seaborn pyarrow \
     ipython-sql sqlalchemy dbt-core
 
+# Kerberos headers needed to build gssapi (requested via pyspnego[kerberos])
+RUN apt-get update && apt-get install -y \
+    libkrb5-dev pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
 # Sparkmagic (known-good with classic stack)
 RUN pip3 install sparkmagic==0.20.5
 
