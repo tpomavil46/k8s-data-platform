@@ -40,6 +40,8 @@ spec:
         prePuller:
           hook:
             enabled: false
+          continuous:
+            enabled: false
 
         hub:
           config:
