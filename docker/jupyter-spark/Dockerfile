@@ -88,3 +88,5 @@ ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
+
+# Updated Sun November 9 2025 9:07AM PDT
