@@ -33,7 +33,9 @@ RUN pip3 install --no-cache-dir \
     pyarrow \
     ipython-sql \
     sqlalchemy \
-    sparkmagic
+    sparkmagic \
+    dbt-core \
+    dbt-spark
 
 # Install Delta Lake for Spark 4.0
 RUN pip3 install --no-cache-dir \
