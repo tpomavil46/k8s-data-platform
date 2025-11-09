@@ -53,22 +53,23 @@ RUN chmod 644 /etc/sparkmagic/config.json
 # Make Jupyter/Sparkmagic see that config by default
 ENV SPARKMAGIC_CONF_DIR=/etc/sparkmagic
 
-# Register kernels (same dynamic finder as above)
-RUN python3 - <<'PY'\n\
-import sys, os, site, subprocess\n\
-site_pkgs = site.getsitepackages() + [site.getusersitepackages()]\n\
-cand = [p for p in site_pkgs if os.path.isdir(p)]\n\
-sm_path = None\n\
-for base in cand:\n\
-    d = os.path.join(base, 'sparkmagic', 'kernels')\n\
-    if os.path.isdir(d): sm_path = d\n\
-if not sm_path:\n\
-    raise SystemExit('sparkmagic kernels path not found')\n\
-for k in os.listdir(sm_path):\n\
-    kp = os.path.join(sm_path, k)\n\
-    if os.path.isdir(kp):\n\
-        subprocess.check_call(['jupyter', 'kernelspec', 'install', '--sys-prefix', kp])\n\
-print('Installed sparkmagic kernels from:', sm_path)\n\
+# Register kernels (dynamic finder)
+RUN python3 - <<'PY'
+import os, site, subprocess
+site_pkgs = site.getsitepackages() + [site.getusersitepackages()]
+sm_path = None
+for base in site_pkgs:
+    d = os.path.join(base, 'sparkmagic', 'kernels')
+    if os.path.isdir(d):
+        sm_path = d
+        break
+if not sm_path:
+    raise SystemExit('sparkmagic kernels path not found')
+for k in os.listdir(sm_path):
+    kp = os.path.join(sm_path, k)
+    if os.path.isdir(kp):
+        subprocess.check_call(['jupyter', 'kernelspec', 'install', '--sys-prefix', kp])
+print('Installed sparkmagic kernels from:', sm_path)
 PY
 
 # Install Delta Lake for Spark 4.0
