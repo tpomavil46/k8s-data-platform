@@ -17,24 +17,10 @@ spec:
         postgresql:
           enabled: false
 
-        # We bring our own Secret via External Secrets → don't let the chart create one
+        # Use externally-managed secret (from ESO) and load it into env
         secretEnv:
           create: false
-
-        # Wire exact keys explicitly from the Secret created by ESO
-        extraEnv:
-          - name: SUPERSET_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: superset-env
-                key: SUPERSET_SECRET_KEY
-          - name: SUPERSET_DATABASE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: superset-env
-                key: SUPERSET_DATABASE_PASSWORD
-          - name: SUPERSET_LOAD_EXAMPLES
-            value: "no"
+        envFromSecret: superset-env
 
         # Disable Redis & Celery for now so we can bring up web cleanly
         redis:
@@ -51,7 +37,7 @@ spec:
             db_user: "superset"
             db_name: "superset"
 
-        # Make sure Superset reads SECRET_KEY from env
+        # Read SECRET_KEY from env and build DB URI if not provided
         configOverrides:
           00_secrets_and_db.py: |
             import os
@@ -69,7 +55,7 @@ spec:
           adminUser:
             username: admin
             password: admin
-            email: tpomavil@icloud.com
+            email: admin@superset.com
 
         ingress:
           enabled: false
