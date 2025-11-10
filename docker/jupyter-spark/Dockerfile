@@ -5,10 +5,10 @@ USER root
 # Remove old Spark 3.5.0
 RUN rm -rf /usr/local/spark*
 
-# System deps
+# System deps (added nano)
 RUN apt-get update && apt-get install -y \
     python3-pip python3-dev build-essential \
-    libssl-dev libffi-dev curl git \
+    libssl-dev libffi-dev curl git nano \
     && rm -rf /var/lib/apt/lists/*
 
 # Make pip behave well on system Python
@@ -24,7 +24,8 @@ RUN pip3 install \
     jupyterlab==3.6.7 \
     notebook==6.5.7 \
     jupyterhub==4.0.2 \
-    ipywidgets==8.1.2
+    ipywidgets==8.1.2 \
+    'jupyter-ai[all]'
 
 # Core Python libs
 RUN pip3 install \
@@ -89,4 +90,3 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 CMD ["jupyterhub-singleuser"]
 
-# Updated Sun November 9 2025 9:07AM PDT
