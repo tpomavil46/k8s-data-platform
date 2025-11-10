@@ -17,18 +17,22 @@ spec:
         postgresql:
           enabled: false
 
-        # DO NOT rely on envFromSecret (chart versions vary). Wire the exact keys explicitly:
-        extraSecretEnv:
-          SUPERSET_SECRET_KEY:
-            secretKeyRef:
-              name: superset-env
-              key: SECRET_KEY
-          SUPERSET_DATABASE_PASSWORD:
-            secretKeyRef:
-              name: superset-env
-              key: password
+        # We bring our own Secret via External Secrets → don't let the chart create one
+        secretEnv:
+          create: false
 
+        # Wire exact keys explicitly from the Secret created by ESO
         extraEnv:
+          - name: SUPERSET_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: superset-env
+                key: SUPERSET_SECRET_KEY
+          - name: SUPERSET_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: superset-env
+                key: SUPERSET_DATABASE_PASSWORD
           - name: SUPERSET_LOAD_EXAMPLES
             value: "no"
 
@@ -65,7 +69,7 @@ spec:
           adminUser:
             username: admin
             password: admin
-            email: admin@superset.com
+            email: tpomavil@icloud.com
 
         ingress:
           enabled: false
