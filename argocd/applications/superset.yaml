@@ -17,10 +17,29 @@ spec:
         postgresql:
           enabled: false
 
-        # Pull SECRET_KEY + DB password from the K8s Secret made by ExternalSecrets
-        envFromSecret: superset-env
+        # DO NOT rely on envFromSecret (chart versions vary). Wire the exact keys explicitly:
+        extraSecretEnv:
+          SUPERSET_SECRET_KEY:
+            secretKeyRef:
+              name: superset-env
+              key: SECRET_KEY
+          SUPERSET_DATABASE_PASSWORD:
+            secretKeyRef:
+              name: superset-env
+              key: password
 
-        # Minimal explicit fields (user/db/host/port). Password is from env above.
+        extraEnv:
+          - name: SUPERSET_LOAD_EXAMPLES
+            value: "no"
+
+        # Disable Redis & Celery for now so we can bring up web cleanly
+        redis:
+          enabled: false
+        worker:
+          enabled: false
+        beat:
+          enabled: false
+
         supersetNode:
           connections:
             db_host: "172.16.0.20"
@@ -28,14 +47,11 @@ spec:
             db_user: "superset"
             db_name: "superset"
 
-        # Ensure Superset sees SECRET_KEY from env
+        # Make sure Superset reads SECRET_KEY from env
         configOverrides:
-          00_secret_key.py: |
+          00_secrets_and_db.py: |
             import os
-            SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY")
-
-          01_db_uri.py: |
-            import os
+            SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
             SQLALCHEMY_DATABASE_URI = os.getenv("SUPERSET_DATABASE_URI")
             if not SQLALCHEMY_DATABASE_URI:
                 user = os.getenv("SUPERSET_DATABASE_USER", "{{ .Values.supersetNode.connections.db_user }}")
@@ -45,30 +61,14 @@ spec:
                 name = "{{ .Values.supersetNode.connections.db_name }}"
                 SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
 
-        # Seed admin for first login (move to Vault later if you like)
         init:
           adminUser:
             username: admin
             password: admin
             email: admin@superset.com
 
-        extraEnv:
-          - name: SUPERSET_LOAD_EXAMPLES
-            value: "no"
-
-        # TEMPORARILY disable Redis + Celery worker/beat so web can start now
-        redis:
-          enabled: false
-
-        worker:
-          enabled: false
-
-        beat:
-          enabled: false
-
         ingress:
           enabled: false
-
   syncPolicy:
     automated:
       prune: true
