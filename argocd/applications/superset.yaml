@@ -24,8 +24,14 @@ spec:
             db_host: "172.16.0.20"
             db_port: "5432"
             db_user: superset
-            db_pass: your_superset_db_password
             db_name: superset
+
+        # Reference the secret for password
+        extraSecretEnv:
+          SUPERSET_DATABASE_PASSWORD:
+            secretKeyRef:
+              name: superset-db-secret
+              key: password
 
         # Enable Redis (in-cluster)
         redis:
@@ -37,10 +43,6 @@ spec:
             username: admin
             password: admin
             email: admin@superset.com
-
-        # Ingress (optional)
-        ingress:
-          enabled: false
 
   syncPolicy:
     automated:
