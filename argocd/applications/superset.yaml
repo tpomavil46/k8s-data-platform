@@ -14,35 +14,49 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
-        # Use external Postgres
         postgresql:
           enabled: false
 
-        # External database config
+        envFromSecret: superset-env
+
+        extraEnv:
+          - name: SUPERSET_LOAD_EXAMPLES
+            value: "no"
+
+        redis:
+          enabled: true
+          auth:
+            enabled: true
+            existingSecret: superset-redis
+            existingSecretPasswordKey: redis-password
+
         supersetNode:
           connections:
             db_host: "172.16.0.20"
             db_port: "5432"
-            db_user: superset
-            db_name: superset
+            db_user: "{{ env 'SUPERSET_DATABASE_USER' | default 'superset' }}"
+            db_name: "{{ env 'SUPERSET_DATABASE_NAME' | default 'superset' }}"
 
-        # Reference the secret for password
-        extraSecretEnv:
-          SUPERSET_DATABASE_PASSWORD:
-            secretKeyRef:
-              name: superset-db-secret
-              key: password
-
-        # Enable Redis (in-cluster)
-        redis:
-          enabled: true
-
-        # Initial admin user
         init:
           adminUser:
             username: admin
             password: admin
             email: admin@superset.com
+
+        configOverrides:
+          00_db_uri.py: |
+            import os
+            SQLALCHEMY_DATABASE_URI = os.getenv("SUPERSET_DATABASE_URI")
+            if not SQLALCHEMY_DATABASE_URI:
+                user = os.getenv("SUPERSET_DATABASE_USER", "{{ .Values.supersetNode.connections.db_user }}")
+                pwd  = os.getenv("SUPERSET_DATABASE_PASSWORD", "")
+                host = "{{ .Values.supersetNode.connections.db_host }}"
+                port = "{{ .Values.supersetNode.connections.db_port }}"
+                name = "{{ .Values.supersetNode.connections.db_name }}"
+                SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
+
+        ingress:
+          enabled: false # flip to true if you want ingress now
 
   syncPolicy:
     automated:
