@@ -9,46 +9,38 @@ spec:
     server: https://kubernetes.default.svc
     namespace: superset
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: https://apache.github.io/superset
     chart: superset
-    targetRevision: 5.0.0
+    targetRevision: 0.12.11
     helm:
       values: |
-        image:
-          registry: docker.io
-          repository: apache/superset
-          tag: latest
-          pullPolicy: IfNotPresent
-
         # Use external Postgres
         postgresql:
           enabled: false
 
-        externalDatabase:
-          host: 172.16.0.20
-          port: 5432
-          user: superset
-          database: superset
-          existingSecret: superset-db-secret
-          existingSecretPasswordKey: password
+        # External database config
+        supersetNode:
+          connections:
+            db_host: "172.16.0.20"
+            db_port: "5432"
+            db_user: superset
+            db_pass: your_superset_db_password
+            db_name: superset
 
-        # Enable Redis (required by Superset)
+        # Enable Redis (in-cluster)
         redis:
           enabled: true
-          auth:
-            enabled: false
 
-        # Superset admin credentials
-        supersetAdmin:
-          username: admin
-          password: admin
-          email: admin@superset.com
+        # Initial admin user
+        init:
+          adminUser:
+            username: admin
+            password: admin
+            email: admin@superset.com
 
-        web:
-          replicaCount: 1
-
-        worker:
-          replicaCount: 1
+        # Ingress (optional)
+        ingress:
+          enabled: false
 
   syncPolicy:
     automated:
