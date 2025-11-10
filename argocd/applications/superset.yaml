@@ -17,12 +17,18 @@ spec:
         postgresql:
           enabled: false
 
-        envFromSecret: superset-env
+        # Read ONLY the DB password from a K8s Secret produced by ExternalSecrets
+        extraSecretEnv:
+          SUPERSET_DATABASE_PASSWORD:
+            secretKeyRef:
+              name: superset-db-secret
+              key: password
 
         extraEnv:
           - name: SUPERSET_LOAD_EXAMPLES
             value: "no"
 
+        # Redis with password coming from ExternalSecrets (requires the secret below)
         redis:
           enabled: true
           auth:
@@ -30,12 +36,13 @@ spec:
             existingSecret: superset-redis
             existingSecretPasswordKey: redis-password
 
+        # Plain values for now (you can move these to Vault later)
         supersetNode:
           connections:
             db_host: "172.16.0.20"
             db_port: "5432"
-            db_user: "{{ env 'SUPERSET_DATABASE_USER' | default 'superset' }}"
-            db_name: "{{ env 'SUPERSET_DATABASE_NAME' | default 'superset' }}"
+            db_user: "superset"
+            db_name: "superset"
 
         init:
           adminUser:
@@ -43,6 +50,7 @@ spec:
             password: admin
             email: admin@superset.com
 
+        # Prefer SUPERSET_DATABASE_URI if you add it later; otherwise build from fields above
         configOverrides:
           00_db_uri.py: |
             import os
@@ -56,7 +64,7 @@ spec:
                 SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
 
         ingress:
-          enabled: false # flip to true if you want ingress now
+          enabled: false # flip to true when ready
 
   syncPolicy:
     automated:
