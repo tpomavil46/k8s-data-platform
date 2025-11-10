@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: superset
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: superset
+    targetRevision: 5.0.0
+    helm:
+      values: |
+        image:
+          registry: docker.io
+          repository: apache/superset
+          tag: latest
+          pullPolicy: IfNotPresent
+
+        # Use external Postgres
+        postgresql:
+          enabled: false
+
+        externalDatabase:
+          host: 172.16.0.20
+          port: 5432
+          user: superset
+          database: superset
+          existingSecret: superset-db-secret
+          existingSecretPasswordKey: password
+
+        # Enable Redis (required by Superset)
+        redis:
+          enabled: true
+          auth:
+            enabled: false
+
+        # Superset admin credentials
+        supersetAdmin:
+          username: admin
+          password: admin
+          email: admin@superset.com
+
+        web:
+          replicaCount: 1
+
+        worker:
+          replicaCount: 1
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
