@@ -17,12 +17,12 @@ spec:
         postgresql:
           enabled: false
 
-        # Use externally-managed secret (from ESO) and load it into env
+        # Bring-your-own secret from ESO
         secretEnv:
           create: false
-        envFromSecret: superset-env
+        envFromSecret: superset-env   # loads SUPERSET_SECRET_KEY + SUPERSET_DATABASE_URI
 
-        # Disable Redis & Celery for now so we can bring up web cleanly
+        # Keep workers off for first boot
         redis:
           enabled: false
         worker:
@@ -30,6 +30,7 @@ spec:
         beat:
           enabled: false
 
+        # Optional: keep these to document where your DB lives, but they’re not required
         supersetNode:
           connections:
             db_host: "172.16.0.20"
@@ -37,19 +38,12 @@ spec:
             db_user: "superset"
             db_name: "superset"
 
-        # Read SECRET_KEY from env and build DB URI if not provided
+        # Config: just read from env
         configOverrides:
           00_secrets_and_db.py: |
             import os
             SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
-            SQLALCHEMY_DATABASE_URI = os.getenv("SUPERSET_DATABASE_URI")
-            if not SQLALCHEMY_DATABASE_URI:
-                user = os.getenv("SUPERSET_DATABASE_USER", "{{ .Values.supersetNode.connections.db_user }}")
-                pwd  = os.getenv("SUPERSET_DATABASE_PASSWORD", "")
-                host = "{{ .Values.supersetNode.connections.db_host }}"
-                port = "{{ .Values.supersetNode.connections.db_port }}"
-                name = "{{ .Values.supersetNode.connections.db_name }}"
-                SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
+            SQLALCHEMY_DATABASE_URI = os.environ["SUPERSET_DATABASE_URI"]
 
         init:
           adminUser:
