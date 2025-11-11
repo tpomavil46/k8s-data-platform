@@ -14,7 +14,7 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
-        # Use built-in PostgreSQL to eliminate external dependencies
+        # Use built-in PostgreSQL
         postgresql:
           enabled: true
           auth:
@@ -22,30 +22,43 @@ spec:
             password: "superset-password"
             database: superset
 
-        # Use built-in Redis
+        # DISABLE Redis completely - it's causing all the problems
         redis:
-          enabled: true
-          architecture: standalone
+          enabled: false
 
-        # Keep it simple - no workers for now
+        # Disable workers
         worker:
           enabled: false
         beat:
           enabled: false
 
-        # Minimal configuration
+        # Force a clean configuration that DISABLES Redis
         configOverrides:
           secret: |
-            SECRET_KEY = "temporary-secret-key-change-in-production"
+            SECRET_KEY = "temporary-secret-key-change-me-later"
+            # Explicitly disable all Redis/cache configurations
+            CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache',
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            DATA_CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache', 
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            FILTER_STATE_CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache',
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            EXPLORE_FORM_DATA_CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache',
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            RESULTS_BACKEND = None
 
+        # Disable init for now
         init:
-          enabled: true
-          adminUser:
-            username: admin
-            password: admin
-            email: admin@superset.com
+          enabled: false
 
-        # Disable ingress for now
         ingress:
           enabled: false
 
