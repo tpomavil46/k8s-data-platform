@@ -14,36 +14,58 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
-        # NO PostgreSQL - use external
         postgresql:
           enabled: false
-        
-        # NO Redis
         redis:
           enabled: false
-        
-        # Use your working secret
-        envFromSecret: superset-env
-        
-        # Disable workers
         worker:
           enabled: false
         beat:
           enabled: false
+        envFromSecret: superset-env
         
-        # Minimal config
+        # COMPLETE configuration override - disable ALL Redis references
         configOverrides:
           secret: |
             import os
+            
+            # Secret key
             SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
-            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{os.environ['DB_USER']}:{os.environ['DB_PASS']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
-        
+            
+            # Database connection
+            DB_USER = os.environ["DB_USER"]
+            DB_PASS = os.environ["DB_PASS"]
+            DB_HOST = os.environ["DB_HOST"]
+            DB_PORT = os.environ["DB_PORT"]
+            DB_NAME = os.environ["DB_NAME"]
+            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+            
+            # COMPLETELY DISABLE all Redis/cache configurations
+            CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache',
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            DATA_CACHE_CONFIG = CACHE_CONFIG
+            FILTER_STATE_CACHE_CONFIG = CACHE_CONFIG
+            EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
+            RESULTS_BACKEND = None
+            
+            # Disable feature flags that might require Redis
+            FEATURE_FLAGS = {
+                "ENABLE_TEMPLATE_PROCESSING": False,
+            }
+            
+            # Force disable any Redis backend
+            def REDIS_CACHE_CONFIG(key):
+                return None
+
+        # Disable init containers
         init:
           enabled: false
 
   syncPolicy:
     automated:
       prune: true
-      selfHeal: false  # Disable self-heal until working
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
