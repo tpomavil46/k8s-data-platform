@@ -9,28 +9,25 @@ spec:
     server: https://kubernetes.default.svc
     namespace: metabase
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: https://helm.metabase.com
     chart: metabase
-    targetRevision: 14.1.3
+    targetRevision: 0.10.0
     helm:
       values: |
-        postgresql:
-          enabled: false
+        # Use environment variables from our secret
+        envFrom:
+          - secretRef:
+              name: metabase-env
         
-        existingSecret: metabase-env
+        # Additional required env vars
+        extraEnvVars:
+          - name: MB_DB_TYPE
+            value: postgresql
         
         service:
           type: ClusterIP
           port: 80
+          targetPort: 3000
         
         ingress:
           enabled: false
-        
-        metrics:
-          enabled: false
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
