@@ -22,9 +22,9 @@ spec:
 
         # Keep workers off for first boot
         redis:
-          enabled: false
+          enabled: true
         worker:
-          enabled: false
+          enabled: true
         beat:
           enabled: false
 
