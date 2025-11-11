@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: superset
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: superset
+  source:
+    repoURL: https://apache.github.io/superset
+    chart: superset
+    targetRevision: 0.12.11
+    helm:
+      values: |
+        postgresql:
+          enabled: false
+        redis:
+          enabled: false
+        worker:
+          enabled: false
+        beat:
+          enabled: false
+        envFromSecret: superset-env
+        
+        # Use configOverridesFiles to COMPLETELY REPLACE the config
+        configOverridesFiles:
+          superset_config.py: |
+            import os
+            
+            # Secret key
+            SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
+            
+            # Database connection
+            DB_USER = os.environ["DB_USER"]
+            DB_PASS = os.environ["DB_PASS"] 
+            DB_HOST = os.environ["DB_HOST"]
+            DB_PORT = os.environ["DB_PORT"]
+            DB_NAME = os.environ["DB_NAME"]
+            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+            SQLALCHEMY_TRACK_MODIFICATIONS = False
+            
+            # Use SimpleCache - NO REDIS
+            CACHE_CONFIG = {
+                'CACHE_TYPE': 'SimpleCache',
+                'CACHE_DEFAULT_TIMEOUT': 300
+            }
+            DATA_CACHE_CONFIG = CACHE_CONFIG
+            FILTER_STATE_CACHE_CONFIG = CACHE_CONFIG
+            EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
+            
+            # NO Redis backend
+            RESULTS_BACKEND = None
+            
+            # Disable Celery since we don't have Redis
+            CELERY_CONFIG = None
+
+        init:
+          enabled: false
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
