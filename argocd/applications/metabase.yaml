@@ -9,9 +9,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: metabase
   source:
-    repoURL: https://github.com/tpomavil46/k8s-data-platform
+    repoURL: https://github.com/your-username/k8s-data-platform  # Your actual repo URL
     targetRevision: main
-    path: kubernetes/metabase
+    path: infrastructure/external-secrets/metabase
   syncPolicy:
     automated:
       prune: true
