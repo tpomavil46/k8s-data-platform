@@ -20,8 +20,9 @@ spec:
         envFrom:
         - secretRef:
             name: metabase-env
-        env:
-        - name: MB_DB_TYPE
+        # REMOVE THIS ENTIRE SECTION:
+        # env:
+        # - name: MB_DB_TYPE
         resources:
           requests:
             memory: "512Mi"
