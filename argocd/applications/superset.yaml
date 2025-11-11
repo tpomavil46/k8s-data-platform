@@ -14,60 +14,36 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
-        # DISABLE built-in PostgreSQL - use your external one
+        # NO PostgreSQL - use external
         postgresql:
           enabled: false
-
-        # DISABLE Redis - we'll use SimpleCache
+        
+        # NO Redis
         redis:
           enabled: false
-
-        # Use your external secret for database connection
+        
+        # Use your working secret
         envFromSecret: superset-env
-
+        
         # Disable workers
         worker:
           enabled: false
         beat:
           enabled: false
-
-        # Build database URI from your secret env vars
+        
+        # Minimal config
         configOverrides:
           secret: |
             import os
             SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
-            # Use the env vars from your superset-env secret
-            DB_USER = os.environ["DB_USER"]
-            DB_PASS = os.environ["DB_PASS"] 
-            DB_HOST = os.environ["DB_HOST"]
-            DB_PORT = os.environ["DB_PORT"]
-            DB_NAME = os.environ["DB_NAME"]
-            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-            
-            # Use SimpleCache instead of Redis
-            CACHE_CONFIG = {
-                'CACHE_TYPE': 'SimpleCache',
-                'CACHE_DEFAULT_TIMEOUT': 300
-            }
-            DATA_CACHE_CONFIG = CACHE_CONFIG
-            FILTER_STATE_CACHE_CONFIG = CACHE_CONFIG
-            EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
-            RESULTS_BACKEND = None
-
-        # Enable init to set up the database
+            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{os.environ['DB_USER']}:{os.environ['DB_PASS']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
+        
         init:
-          enabled: true
-          adminUser:
-            username: admin
-            password: admin
-            email: admin@superset.com
-
-        ingress:
           enabled: false
 
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      selfHeal: false  # Disable self-heal until working
     syncOptions:
       - CreateNamespace=true
