@@ -9,25 +9,34 @@ spec:
     server: https://kubernetes.default.svc
     namespace: metabase
   source:
-    repoURL: https://helm.metabase.com
+    repoURL: https://metabase-helm.github.io/charts
     chart: metabase
-    targetRevision: 0.10.0
+    targetRevision: 1.0.1
     helm:
       values: |
-        # Use environment variables from our secret
-        envFrom:
-          - secretRef:
-              name: metabase-env
+        # Use our existing secret for environment variables
+        existingSecret: metabase-env
         
-        # Additional required env vars
-        extraEnvVars:
+        # Additional environment variables
+        extraEnv:
           - name: MB_DB_TYPE
             value: postgresql
         
+        # Service configuration
         service:
           type: ClusterIP
           port: 80
-          targetPort: 3000
         
+        # Disable ingress for now
         ingress:
           enabled: false
+        
+        # No need for built-in database
+        postgresql:
+          enabled: false
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
