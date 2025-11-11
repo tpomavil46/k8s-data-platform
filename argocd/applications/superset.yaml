@@ -25,7 +25,7 @@ spec:
 
         # Disable init containers for now - we'll handle DB setup manually
         init:
-          enabled: false
+          enabled: true
 
         supersetNode:
           connections:
