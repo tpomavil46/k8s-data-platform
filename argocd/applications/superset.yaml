@@ -14,24 +14,37 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
+        # DISABLE built-in PostgreSQL - use your external one
         postgresql:
-          enabled: true
-          auth:
-            username: superset
-            password: "superset-password"
-            database: superset
+          enabled: false
 
+        # DISABLE Redis - we'll use SimpleCache
         redis:
           enabled: false
 
+        # Use your external secret for database connection
+        envFromSecret: superset-env
+
+        # Disable workers
         worker:
           enabled: false
         beat:
           enabled: false
 
+        # Build database URI from your secret env vars
         configOverrides:
           secret: |
-            SECRET_KEY = "temporary-secret-key-change-me-later"
+            import os
+            SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
+            # Use the env vars from your superset-env secret
+            DB_USER = os.environ["DB_USER"]
+            DB_PASS = os.environ["DB_PASS"] 
+            DB_HOST = os.environ["DB_HOST"]
+            DB_PORT = os.environ["DB_PORT"]
+            DB_NAME = os.environ["DB_NAME"]
+            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+            
+            # Use SimpleCache instead of Redis
             CACHE_CONFIG = {
                 'CACHE_TYPE': 'SimpleCache',
                 'CACHE_DEFAULT_TIMEOUT': 300
@@ -41,8 +54,13 @@ spec:
             EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
             RESULTS_BACKEND = None
 
+        # Enable init to set up the database
         init:
-          enabled: false
+          enabled: true
+          adminUser:
+            username: admin
+            password: admin
+            email: admin@superset.com
 
         ingress:
           enabled: false
@@ -53,7 +71,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-      - PruneLast=true
-      - SkipSchemaValidations=true  # Add this
-      - ServerSideApply=true        # Add this
