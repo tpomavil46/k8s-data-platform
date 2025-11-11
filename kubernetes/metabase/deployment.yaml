@@ -22,7 +22,6 @@ spec:
             name: metabase-env
         env:
         - name: MB_DB_TYPE
-          value: postgresql
         resources:
           requests:
             memory: "512Mi"
