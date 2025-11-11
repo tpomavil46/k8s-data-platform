@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: metabase
-        image: metabase/metabase:latest
+        image: metabase/metabase:v1.48.0
         ports:
         - containerPort: 3000
         envFrom:
