@@ -3,6 +3,9 @@ kind: Application
 metadata:
   name: superset
   namespace: argocd
+  annotations:
+    # Add this to ensure clean sync
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   project: default
   destination:
@@ -22,7 +25,7 @@ spec:
             password: "superset-password"
             database: superset
 
-        # DISABLE Redis completely - it's causing all the problems
+        # DISABLE Redis completely
         redis:
           enabled: false
 
@@ -32,30 +35,21 @@ spec:
         beat:
           enabled: false
 
-        # Force a clean configuration that DISABLES Redis
+        # Force clean config that disables Redis
         configOverrides:
           secret: |
             SECRET_KEY = "temporary-secret-key-change-me-later"
-            # Explicitly disable all Redis/cache configurations
+            # Explicitly disable Redis
             CACHE_CONFIG = {
                 'CACHE_TYPE': 'SimpleCache',
                 'CACHE_DEFAULT_TIMEOUT': 300
             }
-            DATA_CACHE_CONFIG = {
-                'CACHE_TYPE': 'SimpleCache', 
-                'CACHE_DEFAULT_TIMEOUT': 300
-            }
-            FILTER_STATE_CACHE_CONFIG = {
-                'CACHE_TYPE': 'SimpleCache',
-                'CACHE_DEFAULT_TIMEOUT': 300
-            }
-            EXPLORE_FORM_DATA_CACHE_CONFIG = {
-                'CACHE_TYPE': 'SimpleCache',
-                'CACHE_DEFAULT_TIMEOUT': 300
-            }
+            DATA_CACHE_CONFIG = CACHE_CONFIG
+            FILTER_STATE_CACHE_CONFIG = CACHE_CONFIG
+            EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
             RESULTS_BACKEND = None
 
-        # Disable init for now
+        # Disable init
         init:
           enabled: false
 
@@ -68,3 +62,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
