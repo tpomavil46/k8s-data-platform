@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/tpomavil46/k8s-data-platform
     targetRevision: main
-    path: apps/metabase
+    path: kubernetes/metabase
   syncPolicy:
     automated:
       prune: true
