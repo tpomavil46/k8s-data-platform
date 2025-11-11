@@ -16,32 +16,34 @@ spec:
       values: |
         postgresql:
           enabled: false
-
         redis:
           enabled: false
 
         # Use the superset-env secret directly
         envFromSecret: superset-env
 
-        # Disable init containers for now - we'll handle DB setup manually
+        # Enable init to handle DB setup automatically
         init:
           enabled: true
 
-        supersetNode:
-          connections:
-            db_host: "172.16.0.20"
-            db_port: "5432"
-            db_user: "superset"
-            db_name: "superset"
+        # Remove the supersetNode.connections section - it's not used
+        # All connection info comes from the secret env vars
 
         configOverrides:
           secret: |
             import os
+            SECRET_KEY = os.environ.get("SUPERSET_SECRET_KEY")
             SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{os.environ['DB_USER']}:{os.environ['DB_PASS']}@{os.environ['DB_HOST']}:{os.environ.get('DB_PORT', '5432')}/{os.environ['DB_NAME']}"
+
         worker:
           enabled: false
         beat:
           enabled: false
+
+        # Add service configuration
+        service:
+          type: ClusterIP
+          port: 8088
 
   syncPolicy:
     automated:
