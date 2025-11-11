@@ -14,41 +14,38 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
+        # Use built-in PostgreSQL to eliminate external dependencies
         postgresql:
-          enabled: false
+          enabled: true
+          auth:
+            username: superset
+            password: "superset-password"
+            database: superset
 
-        # Use the superset-env secret
-        envFromSecret: superset-env
-
-        # Keep workers off for first boot
+        # Use built-in Redis
         redis:
           enabled: true
+          architecture: standalone
+
+        # Keep it simple - no workers for now
         worker:
-          enabled: true
+          enabled: false
         beat:
           enabled: false
 
-        # Remove supersetNode.connections - not needed since we use env vars
-
-        # Config: build the database URI from individual env vars
+        # Minimal configuration
         configOverrides:
-          00_secrets_and_db.py: |
-            import os
-            SECRET_KEY = os.environ["SUPERSET_SECRET_KEY"]
-            # Build the database URI from individual components
-            DB_USER = os.environ["DB_USER"]
-            DB_PASS = os.environ["DB_PASS"]
-            DB_HOST = os.environ["DB_HOST"]
-            DB_PORT = os.environ["DB_PORT"]
-            DB_NAME = os.environ["DB_NAME"]
-            SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+          secret: |
+            SECRET_KEY = "temporary-secret-key-change-in-production"
 
         init:
+          enabled: true
           adminUser:
             username: admin
             password: admin
             email: admin@superset.com
 
+        # Disable ingress for now
         ingress:
           enabled: false
 
