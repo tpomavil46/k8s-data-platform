@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: superset
   namespace: argocd
-  annotations:
-    # Add this to ensure clean sync
-    argocd.argoproj.io/sync-options: Prune=true
 spec:
   project: default
   destination:
@@ -17,7 +14,6 @@ spec:
     targetRevision: 0.12.11
     helm:
       values: |
-        # Use built-in PostgreSQL
         postgresql:
           enabled: true
           auth:
@@ -25,21 +21,17 @@ spec:
             password: "superset-password"
             database: superset
 
-        # DISABLE Redis completely
         redis:
           enabled: false
 
-        # Disable workers
         worker:
           enabled: false
         beat:
           enabled: false
 
-        # Force clean config that disables Redis
         configOverrides:
           secret: |
             SECRET_KEY = "temporary-secret-key-change-me-later"
-            # Explicitly disable Redis
             CACHE_CONFIG = {
                 'CACHE_TYPE': 'SimpleCache',
                 'CACHE_DEFAULT_TIMEOUT': 300
@@ -49,7 +41,6 @@ spec:
             EXPLORE_FORM_DATA_CACHE_CONFIG = CACHE_CONFIG
             RESULTS_BACKEND = None
 
-        # Disable init
         init:
           enabled: false
 
@@ -64,3 +55,5 @@ spec:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
+      - SkipSchemaValidations=true  # Add this
+      - ServerSideApply=true        # Add this
