@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dbt-streaming-refresh
+  namespace: streaming-demo
+spec:
+  schedule: "*/2 * * * *"  # Every 2 minutes
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid  # Don't run multiple jobs concurrently
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: dbt-streaming-refresh
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: dbt
+            image: ghcr.io/tpomavil46/k8s-data-platform/dbt-streaming-demo:latest
+            imagePullPolicy: Always
+            command: ["dbt", "run"]
+            envFrom:
+            - secretRef:
+                name: dbt-env
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
