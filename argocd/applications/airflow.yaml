@@ -25,16 +25,19 @@ spec:
         ingress:
           enabled: false
         
-        # Git-sync for DAGs
+        # Git-sync for DAGs (corrected syntax)
         dags:
           gitSync:
             enabled: true
             repo: https://github.com/tpomavil46/k8s-data-platform.git
             branch: main
             rev: HEAD
+            ref: main
             depth: 1
+            maxFailures: 0
             subPath: "airflow/dags"
             wait: 60
+            containerName: git-sync
         
         # Inject connection secrets
         env:
