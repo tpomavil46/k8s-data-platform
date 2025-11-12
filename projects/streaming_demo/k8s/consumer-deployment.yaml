@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+  namespace: streaming-demo
+spec:
+  replicas: 0  # Start with 0, scale to 1 when you want to demo
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: ghcr.io/tpomavil46/k8s-data-platform/kafka-consumer:latest
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: dbt-env  # Reuse the same postgres credentials
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-service.kafka.svc.cluster.local:9092"
+        - name: KAFKA_TOPIC
+          value: "user-events"
+        - name: KAFKA_GROUP_ID
+          value: "streaming-consumer-group"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"

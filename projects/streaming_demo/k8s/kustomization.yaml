@@ -5,3 +5,5 @@ resources:
   - namespace.yaml
   - externalsecret-dbt.yaml
   - rbac.yaml
+  - producer-deployment.yaml
+  - consumer-deployment.yaml

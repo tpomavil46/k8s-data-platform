@@ -1,0 +1,84 @@
+name: Build Streaming Demo Apps
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'projects/streaming_demo/kafka_producer/**'
+      - 'projects/streaming_demo/kafka_consumer/**'
+      - 'projects/streaming_demo/Dockerfile.producer'
+      - 'projects/streaming_demo/Dockerfile.consumer'
+      - '.github/workflows/build-streaming-apps.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-producer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for producer
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/kafka-producer
+          tags: |
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push producer
+        uses: docker/build-push-action@v5
+        with:
+          context: ./projects/streaming_demo
+          file: ./projects/streaming_demo/Dockerfile.producer
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-consumer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for consumer
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/kafka-consumer
+          tags: |
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push consumer
+        uses: docker/build-push-action@v5
+        with:
+          context: ./projects/streaming_demo
+          file: ./projects/streaming_demo/Dockerfile.consumer
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -2,10 +2,12 @@ from kafka import KafkaConsumer
 import json
 import psycopg2
 import os
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Note: No need for dotenv in containerized environment - K8s injects env vars directly
+
+KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
+KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'user-events')
+KAFKA_GROUP_ID = os.getenv('KAFKA_GROUP_ID', 'python-consumer')
 
 # Postgres connection
 conn = psycopg2.connect(
@@ -32,24 +34,21 @@ cur.execute("""
 """)
 conn.commit()
 
-# Kafka consumer
+# Kafka consumer - use env vars here!
 consumer = KafkaConsumer(
-    'user_events',
-    bootstrap_servers=['localhost:9092'],
+    KAFKA_TOPIC,  # Use env var
+    bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS],  # Use env var
     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-    group_id='python-consumer',
+    group_id=KAFKA_GROUP_ID,  # Use env var
     auto_offset_reset='earliest'
 )
 
-print("Consuming messages and writing to Postgres...")
+print(f"Consuming messages from {KAFKA_TOPIC} on {KAFKA_BOOTSTRAP_SERVERS} and writing to Postgres...")
 
 for message in consumer:
-    # print(f"DEBUG: Received message from Kafka: {message.value}")
     event = message.value
     user_id = event['user_id']
     event_type = event['event_type']
-    
-    # print(f"DEBUG: About to insert user_id={user_id}, event_type={event_type}")
     
     # Upsert into Postgres
     cur.execute("""
@@ -59,7 +58,5 @@ for message in consumer:
         DO UPDATE SET event_count = streaming.user_events.event_count + 1
     """, (user_id, event_type))
     
-    # print(f"DEBUG: Executed query")
     conn.commit()
-    # print(f"DEBUG: Committed to DB")
     print(f"Processed: user {user_id}, event {event_type}")
