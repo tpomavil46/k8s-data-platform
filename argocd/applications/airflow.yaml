@@ -25,7 +25,18 @@ spec:
         ingress:
           enabled: false
         
-        # Inject connection secrets as environment variables
+        # Git-sync for DAGs
+        dags:
+          gitSync:
+            enabled: true
+            repo: https://github.com/tpomavil46/k8s-data-platform.git
+            branch: main
+            rev: HEAD
+            depth: 1
+            subPath: "airflow/dags"
+            wait: 60
+        
+        # Inject connection secrets
         env:
           - name: AIRFLOW_CONN_MINIO_DEFAULT
             valueFrom:
