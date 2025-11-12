@@ -11,6 +11,13 @@ spec:
     targetRevision: 1.16.0
     helm:
       values: |
+        # Use custom image with dbt
+        images:
+          airflow:
+            repository: ghcr.io/tpomavil46/k8s-data-platform/airflow-dbt
+            tag: latest
+            pullPolicy: Always
+        
         executor: KubernetesExecutor
         postgresql:
           enabled: false
@@ -25,7 +32,20 @@ spec:
         ingress:
           enabled: false
         
-        # Inject connection secrets as environment variables
+        # Git-sync configuration for DAGs
+        dags:
+          gitSync:
+            enabled: true
+            repo: https://github.com/tpomavil46/k8s-data-platform.git
+            branch: main
+            rev: HEAD
+            depth: 1
+            maxFailures: 0
+            subPath: "airflow/dags"
+            wait: 60
+            containerName: git-sync
+        
+        # Inject connection secrets
         env:
           - name: AIRFLOW_CONN_MINIO_DEFAULT
             valueFrom:
@@ -47,6 +67,11 @@ spec:
               secretKeyRef:
                 name: airflow-connections
                 key: AIRFLOW_CONN_SPARK_DEFAULT
+        
+        # Inject dbt credentials from secret
+        extraEnvFrom:
+          - secretRef:
+              name: airflow-dbt-env
   destination:
     server: https://kubernetes.default.svc
     namespace: airflow
@@ -66,6 +91,12 @@ spec:
   - group: ""
     kind: Secret
     name: airflow-fernet-key
+    namespace: airflow
+    jsonPointers:
+    - /data
+  - group: ""
+    kind: Secret
+    name: airflow-dbt-env
     namespace: airflow
     jsonPointers:
     - /data
