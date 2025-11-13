@@ -19,13 +19,13 @@ spec:
     resource:
       cpu: 0.5
       memory: 1536m
-    replicas: 0
+    replicas: 1
 
   taskManager:
     resource:
       cpu: 0.5
       memory: 1024m
-    replicas: 0
+    replicas: 1
 
     podTemplate:
       spec:
