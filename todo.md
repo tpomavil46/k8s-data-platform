@@ -5,6 +5,111 @@
 **Positioning:** ChemE + Software Engineering expertise providing pre-built data analytics solutions  
 **Goal:** Build a production-ready SaaS/on-prem platform for manufacturing analytics, ML, and optimization
 
+
+---
+
+## PHASE 0: R730 Bring-up & Cluster Consolidation
+
+### Goal
+Relieve CPU pressure on P52, centralize storage, and create a more production-like layout using the R730 as:
+- Proxmox hypervisor
+- Host for external data services (Postgres, MinIO)
+- Host for one or more heavyweight k8s worker nodes
+
+---
+
+### Step 0.1: R730 Hardware & Base Setup
+- [ ] Rack and cable R730 (power + network, ideally bonded NICs)
+- [ ] Update BIOS and iDRAC firmware
+- [ ] Verify/replace 80GB SSD if needed for Proxmox boot
+- [ ] Install 12TB HDD + caddy, confirm it’s visible in BIOS/RAID
+- [ ] Decide RAID/HBA mode:
+  - [ ] For now: simple RAID1/RAID0 or single-disk virtual drive for 12TB (OK for home lab)
+  - [ ] Later: consider HBA/IT mode if moving to ZFS
+
+**Deliverable:** R730 booting cleanly with all disks visible.
+
+---
+
+### Step 0.2: Install Proxmox & Base Storage Layout
+- [ ] Install Proxmox VE on 80GB SSD
+- [ ] Configure basic networking (static IP, VLANs if used)
+- [ ] Create storage:
+  - [ ] `local` (SSD) for ISOs / small VMs
+  - [ ] `hdd-12tb` (backed by 12TB disk) for data VMs
+- [ ] Set up Proxmox backups (to MinIO, NFS, or external disk)
+
+**Deliverable:** Proxmox host ready to run VMs with clear SSD vs HDD usage.
+
+---
+
+### Step 0.3: Data Services VM (Postgres + MinIO)
+- [ ] Create VM `data-svcs-01`:
+  - [ ] 4–8 vCPU, 16–32GB RAM
+  - [ ] Small system disk (e.g. 80–160GB on SSD)
+  - [ ] Large data disk on 12TB HDD (either pass-through or virtual disk)
+- [ ] Install Ubuntu + harden SSH
+- [ ] Install and configure:
+  - [ ] Postgres (as external DB for platform)
+  - [ ] MinIO (as S3 storage for platform)
+- [ ] Move existing platform data here (if needed):
+  - [ ] Migrate Postgres databases
+  - [ ] Sync MinIO buckets
+- [ ] Expose services on LAN with fixed IP/DNS names:
+  - [ ] `postgres.data.local`
+  - [ ] `minio.data.local`
+
+**Deliverable:** Dedicated VM providing Postgres + MinIO external to k8s.
+
+---
+
+### Step 0.4: Wire k8s to External Postgres & MinIO
+- [ ] Create Kubernetes Services for external endpoints:
+  - [ ] `postgres.data.svc.cluster.local` (ExternalName or Endpoints)
+  - [ ] `minio.data.svc.cluster.local`
+- [ ] Update Helm values for:
+  - [ ] Airflow
+  - [ ] Superset
+  - [ ] Metabase
+  - [ ] MLflow (later)
+  - [ ] Any app using S3/DB
+- [ ] Store connection strings/secrets in Vault / External Secrets
+
+**Deliverable:** Cluster uses external DB + storage, state decoupled from k8s nodes.
+
+---
+
+### Step 0.5: R730-backed k8s Worker Nodes
+- [ ] Create Proxmox VM `k8s-w-r730-1`:
+  - [ ] 8–12 vCPU, 32–48GB RAM
+  - [ ] System disk on SSD or fast storage
+- [ ] Join VM to existing k8s cluster via Kubespray
+- [ ] Label node:
+  - [ ] `tier=heavy`
+- [ ] Update workloads to target heavy node:
+  - [ ] Kafka
+  - [ ] Trino workers
+  - [ ] Spark workloads
+  - [ ] Airflow workers
+  - [ ] Jupyter user pods (optional)
+- [ ] (Optional) Create `k8s-w-r730-2` VM and scale out similarly
+
+**Deliverable:** R730 is the main compute/data plane, P52 mostly control-plane + light services.
+
+---
+
+### Step 0.6: Clean-up & Validation
+- [ ] Verify CPU/RAM utilization on P52 drops to reasonable levels
+- [ ] Ensure all critical workloads are:
+  - [ ] Using external Postgres and MinIO
+  - [ ] Scheduled on R730-based nodes where appropriate
+- [ ] Document new architecture:
+  - [ ] Node roles
+  - [ ] VM layouts
+  - [ ] Storage mapping (what lives where)
+
+**Deliverable:** Stable, documented baseline platform ready for Month 1–3 roadmap work.
+
 ---
 
 ## Current Platform Status ✅
