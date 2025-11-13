@@ -26,6 +26,7 @@ run_dbt = KubernetesPodOperator(
     namespace='streaming-demo',
     image='ghcr.io/tpomavil46/k8s-data-platform/dbt-streaming-demo:latest',
     cmds=['dbt', 'run'],
+    service_account_name='airflow-dbt-runner',  # ADD THIS LINE
     env_from=[
         k8s.V1EnvFromSource(
             secret_ref=k8s.V1SecretEnvSource(name='dbt-env')
