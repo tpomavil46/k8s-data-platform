@@ -23,10 +23,10 @@ dag = DAG(
 run_dbt = KubernetesPodOperator(
     task_id='run_dbt_models',
     name='dbt-streaming-run',
-    namespace='streaming-demo',
+    namespace='airflow',  # Changed from streaming-demo
     image='ghcr.io/tpomavil46/k8s-data-platform/dbt-streaming-demo:latest',
     cmds=['dbt', 'run'],
-    service_account_name='airflow-dbt-runner',  # ADD THIS LINE
+    service_account_name='airflow-worker',  # Changed from airflow-dbt-runner
     env_from=[
         k8s.V1EnvFromSource(
             secret_ref=k8s.V1SecretEnvSource(name='dbt-env')
