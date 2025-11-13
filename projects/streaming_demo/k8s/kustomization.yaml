@@ -6,4 +6,4 @@ resources:
   - externalsecret-dbt.yaml
   - rbac.yaml
   - producer-deployment.yaml
-  - consumer-deployment.yaml
+  - consumer-deployment.yaml  - externalsecret-dbt-airflow.yaml
