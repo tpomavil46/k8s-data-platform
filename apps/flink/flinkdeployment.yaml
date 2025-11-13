@@ -1,0 +1,56 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: basic-flink-example
+  namespace: flink
+spec:
+  image: flink:1.20
+  serviceAccount: flink
+  flinkVersion: v1_20
+
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "1"
+    # Start simple: no HA, local dirs are fine for a demo
+    state.checkpoints.dir: file:///tmp/flink-checkpoints
+    state.savepoints.dir: file:///tmp/flink-savepoints
+    pipeline.classpaths: file:///opt/flink/lib/postgresql.jar
+
+  jobManager:
+    resource:
+      cpu: 0.5
+      memory: 1536m
+    replicas: 1
+
+  taskManager:
+    resource:
+      cpu: 0.5
+      memory: 1024m
+    replicas: 1
+
+    podTemplate:
+      spec:
+        initContainers:
+          - name: fetch-postgres-driver
+            image: curlimages/curl:8.7.1
+            command: ["/bin/sh", "-lc"]
+            args:
+              - >
+                curl -fL -o /tmp/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar &&
+                cp /tmp/postgresql.jar /flink-lib/
+            volumeMounts:
+              - name: flink-lib
+                mountPath: /flink-lib
+        containers:
+          - name: flink-main-container
+            image: flink:1.20
+            volumeMounts:
+              - name: flink-lib
+                mountPath: /opt/flink/lib
+        volumes:
+          - name: flink-lib
+            emptyDir: {}
+
+  job:
+    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
+    parallelism: 1
+    upgradeMode: stateless
