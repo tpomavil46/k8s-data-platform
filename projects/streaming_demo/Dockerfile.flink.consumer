@@ -1,0 +1,15 @@
+FROM flink:1.18-python3.11
+
+# Install Python dependencies
+RUN pip install --no-cache-dir \
+    apache-flink==1.18.0 \
+    psycopg2-binary \
+    kafka-python
+
+# Copy the Flink job
+COPY kafka_to_postgres.py /opt/flink-job/
+
+# Set working directory
+WORKDIR /opt/flink-job
+
+# The entrypoint will be set by Kubernetes Job

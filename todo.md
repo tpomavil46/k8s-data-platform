@@ -139,7 +139,7 @@ Relieve CPU pressure on P52, centralize storage, and create a more production-li
 **Why First:** Critical visibility into all services before scaling
 
 #### Prometheus
-- [ ] Deploy Prometheus via Helm chart
+- [x] Deploy Prometheus via Helm chart
 - [ ] Configure service monitors for:
   - [ ] Kubernetes cluster metrics
   - [ ] Spark jobs
@@ -150,7 +150,7 @@ Relieve CPU pressure on P52, centralize storage, and create a more production-li
 - [ ] Configure retention policies (30 days recommended)
 
 #### Grafana
-- [ ] Deploy Grafana via Helm
+- [x] Deploy Grafana via Helm
 - [ ] Connect to Prometheus data source
 - [ ] Import pre-built dashboards:
   - [ ] Kubernetes cluster overview
@@ -365,7 +365,7 @@ Relieve CPU pressure on P52, centralize storage, and create a more production-li
 
 #### Pre-built Notebook Environments
 - [ ] Create Docker images for each language:
-  - [ ] `jupyter-pyspark:4.0.1` (already done ✅)
+  - [x] `jupyter-pyspark:4.0.1` (already done ✅)
   - [ ] `jupyter-scala-spark:4.0.1`
   - [ ] `jupyter-r-spark:4.0.1`
   - [ ] `jupyter-polyglot:4.0.1` (all languages)

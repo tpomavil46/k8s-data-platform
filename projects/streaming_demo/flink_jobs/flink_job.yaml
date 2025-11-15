@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flink-kafka-postgres-job
+  namespace: streaming-demo
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: flink-job-submitter
+        image: ghcr.io/YOUR_GITHUB_USERNAME/flink-kafka-postgres-job:latest
+        imagePullPolicy: Always
+        command:
+          - /bin/bash
+          - -c
+          - |
+            # Submit job to Flink cluster via REST API
+            flink run \
+              --jobmanager basic-flink-example-rest.flink:8081 \
+              --python /opt/flink-job/kafka_to_postgres.py \
+              --pyExecutable python3
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka-service.streaming-demo:9092"
+        - name: KAFKA_TOPIC
+          value: "user-events"
+        - name: KAFKA_GROUP_ID
+          value: "flink-consumer"
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials  # Adjust to your secret name
+              key: host
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+      imagePullSecrets:
+      - name: ghcr-secret  # Adjust if you have a different image pull secret
