@@ -25,7 +25,7 @@ RUN pip3 install \
     notebook==6.5.7 \
     jupyterhub==4.0.2 \
     ipywidgets==8.1.2 \
-    'jupyter-ai[all]'
+    'jupyter-ai[all]>=1.0,<2.0'
 
 # Core Python libs
 RUN pip3 install \
