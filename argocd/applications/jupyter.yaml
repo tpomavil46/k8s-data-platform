@@ -45,6 +45,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   # This secret must be created in the 'jupyter' namespace
+                  # by your ExternalSecret
                   name: jupyter-ai-google-secrets
                   key: google-api-key
             
@@ -90,7 +91,9 @@ spec:
             auth: |
               from oauthenticator.github import GitHubOAuthenticator
               c.JupyterHub.authenticator_class = GitHubOAuthenticator
-              c.JupyterHub.authenticator_id = os.environ.get('OAUTH_CLIENT_ID')
+              # --- THIS IS THE CORRECTED LINE ---
+              c.GitHubOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID')
+              # --- END CORRECTION ---
               c.GitHubOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
               c.GitHubOAuthenticator.oauth_callback_url = 'https://jupyter.tpomaville.com/hub/oauth_callback'
   destination:
