@@ -50,8 +50,10 @@ spec:
                   key: google-api-key
             
             # 2. Tells jupyter-ai which model to use by default
-              JUPYTER_AI_DEFAULT_MODEL: "google-ai:gemini-pro-latest"
-              JUPYTER_AI_EMBEDDING_MODEL: "google-ai:text-embedding-004"
+                JUPYTER_AI_DEFAULT_MODEL:
+                  value: "google-ai:gemini-pro-latest"
+                JUPYTER_AI_EMBEDDING_MODEL:
+                  value: "google-ai:text-embedding-004"
           # === END JUPYTER AI CONFIGURATION ===
 
         # 👇 Disable the failing pre-pull hook so Argo can go Healthy
