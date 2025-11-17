@@ -50,7 +50,7 @@ spec:
                   key: google-api-key
             
             # 2. Tells jupyter-ai which model to use by default
-            JUPYTER_AI_DEFAULT_MODEL: "gemini:gemini-2.5-flash"
+            JUPYTER_AI_DEFAULT_MODEL: "gemini:gemini-2.5-pro"
           # === END JUPYTER AI CONFIGURATION ===
 
         # 👇 Disable the failing pre-pull hook so Argo can go Healthy
