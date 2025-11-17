@@ -27,8 +27,8 @@ RUN pip3 install \
     ipywidgets==8.1.2 \
     google-generativeai>=0.5.2 \
     langchain-google-genai>=1.0.3 \
-    jupyter-ai==2.31.6 \
-    jupyter-ai-magics==2.31.6
+    jupyter-ai==2.19.1 \
+    jupyter-ai-magics==2.19.1
 
 # Core Python libs
 RUN pip3 install \
