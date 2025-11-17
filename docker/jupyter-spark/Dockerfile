@@ -25,6 +25,8 @@ RUN pip3 install \
     notebook==6.5.7 \
     jupyterhub==4.0.2 \
     ipywidgets==8.1.2 \
+    google-generativeai>=0.5.2 \
+    langchain-google-genai>=1.0.3 \
     'jupyter-ai[all]>=1.0,<2.0'
 
 # Core Python libs
