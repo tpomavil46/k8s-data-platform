@@ -84,7 +84,7 @@ WORKDIR /home/jovyan
 
 # Env
 ENV SHELL=/bin/bash
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV JAVA_HOME=/opt/java/openjdk
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
