@@ -90,7 +90,7 @@ ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
 # JUPYTER AI CONFIG
-ENV JUPYTER_AI_DEFAULT_MODEL="google:gemini-1.5-flash"
+ENV JUPYTER_AI_DEFAULT_MODEL="gemini:gemini-1.5-flash"
 
 CMD ["jupyterhub-singleuser"]
 
