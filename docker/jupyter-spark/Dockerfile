@@ -25,10 +25,11 @@ RUN pip3 install \
     notebook==6.5.7 \
     jupyterhub==4.0.2 \
     ipywidgets==8.1.2 \
+    'pydantic<2.0' \
     google-generativeai>=0.5.2 \
     langchain-google-genai>=1.0.3 \
-    'pydantic>=1.10,<2.0' \
-    'jupyter-ai[all]>=2.0,<3.0'
+    jupyter-ai==2.8.0 \
+    jupyter-ai-magics==2.8.0
 
 # Core Python libs
 RUN pip3 install \
