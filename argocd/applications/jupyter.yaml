@@ -47,7 +47,7 @@ spec:
                   # This secret must be created in the 'jupyter' namespace
                   # by your ExternalSecret
                   name: jupyter-ai-google-secrets
-                  key: gemini-api-key
+                  key: google-api-key
             
             # 2. Tells jupyter-ai which model to use by default
             JUPYTER_AI_DEFAULT_MODEL: "gemini:gemini-1.5-flash"
