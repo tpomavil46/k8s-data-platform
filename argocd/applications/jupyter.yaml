@@ -35,26 +35,6 @@ spec:
             limit: 4G
             guarantee: 512M
           serviceAccountName: jupyter-spark
-          
-          # === JUPYTER AI (GEMINI) CONFIGURATION ===
-          # This block provides the API key and default model to the
-          # single-user pod, which allows the jupyter-ai backend to start.
-          extraEnv:
-            # 1. Mounts the Google API Key from the k8s secret
-            GOOGLE_API_KEY:
-              valueFrom:
-                secretKeyRef:
-                  # This secret must be created in the 'jupyter' namespace
-                  # by your ExternalSecret
-                  name: jupyter-ai-google-secrets
-                  key: google-api-key
-            
-            # 2. Tells jupyter-ai which model to use by default
-                  JUPYTER_AI_DEFAULT_MODEL:
-                    value: "gemini:gemini-pro-latest"
-                  JUPYTER_AI_EMBEDDING_MODEL:
-                    value: "gemini:models/embedding-001"
-          # === END JUPYTER AI CONFIGURATION ===
 
         # 👇 Disable the failing pre-pull hook so Argo can go Healthy
         prePuller:
@@ -94,9 +74,7 @@ spec:
             auth: |
               from oauthenticator.github import GitHubOAuthenticator
               c.JupyterHub.authenticator_class = GitHubOAuthenticator
-              # --- THIS IS THE CORRECTED LINE ---
               c.GitHubOAuthenticator.client_id = os.environ.get('OAUTH_CLIENT_ID')
-              # --- END CORRECTION ---
               c.GitHubOAuthenticator.client_secret = os.environ.get('OAUTH_CLIENT_SECRET')
               c.GitHubOAuthenticator.oauth_callback_url = 'https://jupyter.tpomaville.com/hub/oauth_callback'
   destination:

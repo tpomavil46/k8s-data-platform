@@ -24,11 +24,7 @@ RUN pip3 install \
     jupyterlab==3.6.7 \
     notebook==6.5.7 \
     jupyterhub==4.0.2 \
-    ipywidgets==8.1.2 \
-    google-generativeai>=0.5.2 \
-    langchain-google-genai>=1.0.3 \
-    jupyter-ai==2.19.1 \
-    jupyter-ai-magics==2.19.1
+    ipywidgets==8.1.2
 
 # Core Python libs
 RUN pip3 install \
@@ -92,8 +88,4 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
-# JUPYTER AI CONFIG
-ENV JUPYTER_AI_DEFAULT_MODEL="gemini:gemini-pro-latest"
-
 CMD ["jupyterhub-singleuser"]
-
