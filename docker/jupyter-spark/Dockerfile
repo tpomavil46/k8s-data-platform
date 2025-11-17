@@ -89,5 +89,8 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
+# JUPYTER AI CONFIG
+ENV JUPYTER_AI_DEFAULT_MODEL="google:gemini-1.5-flash"
+
 CMD ["jupyterhub-singleuser"]
 
