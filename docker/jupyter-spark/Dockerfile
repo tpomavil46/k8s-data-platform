@@ -28,9 +28,9 @@ RUN pip3 install \
     'pydantic<2.0' \
     google-generativeai>=0.5.2 \
     langchain-google-genai>=1.0.3 \
-    jupyter-ai==1.17.3 \
-    jupyter-ai-magics==1.17.3
-    
+    jupyter-ai==2.31.6 \
+    jupyter-ai-magics==2.31.6
+
 # Core Python libs
 RUN pip3 install \
     pyspark==4.0.1 \
