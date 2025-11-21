@@ -54,10 +54,10 @@ spec:
           enabled: true
           deployment:
             image:
-              repository: ghcr.io/tpomavil46/unity-catalog-ui
+              repository: ghcr.io/tpomavil46/unity-catalog-ui  # Your custom image
               tag: "0.3.0"
-              pullPolicy: IfNotPresent
-            port: 80  # nginx runs on 80
+              pullPolicy: Always
+            port: 80  # nginx port, not 3000
             replicaCount: 1
             resources:
               requests:
@@ -65,15 +65,14 @@ spec:
                 cpu: "50m"
               limits:
                 memory: "256Mi"
-                cpu: "100m"
+                cpu: "200m"
           
           service:
             type: ClusterIP
             port: 80
           
-          # Tell UI where to find the server
           proxyApiRequests: false
-          serverUrl: http://unity-catalog-unitycatalog-server:8080
+          serverUrl: ""
         
         ingress:
           enabled: true
