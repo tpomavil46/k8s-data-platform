@@ -51,7 +51,7 @@ spec:
                 credentialsSecretName: unity-catalog-minio-credentials
         
         ui:
-          enabled: true
+          enabled: false
           deployment:
             image:
               repository: ghcr.io/tpomavil46/unity-catalog-ui
