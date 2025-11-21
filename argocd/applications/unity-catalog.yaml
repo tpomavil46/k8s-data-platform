@@ -52,6 +52,24 @@ spec:
         
         ui:
           enabled: true
+          deployment:
+            image:
+              repository: ghcr.io/tpomavil46/unity-catalog-ui
+              tag: "0.3.0"
+              pullPolicy: Always
+            port: 80
+            replicaCount: 1
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "50m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+          service:
+            type: ClusterIP
+            port: 80
+          proxyApiRequests: false
         
         ingress:
           enabled: true
