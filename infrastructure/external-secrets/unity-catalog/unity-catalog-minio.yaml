@@ -14,7 +14,7 @@ spec:
   data:
     - secretKey: accessKey
       remoteRef:
-        key: secret/unity-catalog/minio
+        key: kv/unity-catalog/minio
         property: accessKey
     - secretKey: secretKey
       remoteRef:
