@@ -52,7 +52,11 @@ spec:
         
         ui:
           enabled: true
+          config:
+            # This environment variable must be correct for the UI to talk to the Server
+            SERVER_URL: http://unity-catalog-unitycatalog-server:8081
           deployment:
+            command: ["/bin/sh", "-c", "npm run build && nginx -g 'daemon off;'"]
             replicaCount: 1
             resources:
               requests:
