@@ -1,0 +1,96 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: unity-catalog
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/unitycatalog/unitycatalog.git
+    targetRevision: v0.2.0
+    path: helm
+    helm:
+      values: |
+        server:
+          enabled: true
+          
+          db:
+            type: postgresql
+            postgresqlConfig:
+              host: 172.16.0.20
+              port: 5432
+              dbName: unitycatalog
+              username: unitycatalog
+              passwordSecretName: unity-catalog-db-password
+              passwordSecretKey: password
+          
+          deployment:
+            replicaCount: 1
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "250m"
+              limits:
+                memory: "1Gi"
+                cpu: "500m"
+          
+          service:
+            type: ClusterIP
+            port: 8080
+          
+          logLevel: info
+        
+        storage:
+          modelStorageRoot: s3://unity-catalog/models
+          credentials:
+            s3:
+              - bucketPath: s3://unity-catalog
+                region: us-east-1  # MinIO doesn't care but required field
+                credentialsSecretName: unity-catalog-minio-credentials
+        
+        ui:
+          enabled: true
+          deployment:
+            replicaCount: 1
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "250m"
+          
+          service:
+            type: ClusterIP
+            port: 3000
+        
+        ingress:
+          enabled: true
+          host: unitycatalog.tpomaville.com
+          ingressClassName: nginx
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          tlsSecretName: unity-catalog-tls
+        
+        auth:
+          enabled: false  # Start without auth, add later
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: data-platform
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
