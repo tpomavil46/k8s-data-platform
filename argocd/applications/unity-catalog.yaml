@@ -52,10 +52,6 @@ spec:
         
         ui:
           enabled: true
-          extraArgs: 
-            - "/bin/sh"
-            - "-c"
-            - "npm install && npm run build && /usr/sbin/nginx -g 'daemon off;'"
           deployment:
             replicaCount: 1
             resources:
