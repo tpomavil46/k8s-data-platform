@@ -54,10 +54,10 @@ spec:
           enabled: true
           deployment:
             image:
-              repository: ghcr.io/tpomavil46/unity-catalog-ui  # Your custom image
+              repository: ghcr.io/tpomavil46/unity-catalog-ui
               tag: "0.3.0"
               pullPolicy: Always
-            port: 80  # nginx port, not 3000
+            port: 80
             replicaCount: 1
             resources:
               requests:
@@ -66,6 +66,18 @@ spec:
               limits:
                 memory: "256Mi"
                 cpu: "200m"
+            
+            # Override the container to not use bash (nginx doesn't have it)
+            extraContainers:
+              - name: ui
+                image: ghcr.io/tpomavil46/unity-catalog-ui:0.3.0
+                imagePullPolicy: Always
+                ports:
+                  - containerPort: 80
+                    name: ui
+                # Let nginx run its default CMD - don't override
+                command: []
+                args: []
           
           service:
             type: ClusterIP
