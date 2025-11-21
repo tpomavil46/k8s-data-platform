@@ -631,7 +631,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: data-platform.tpomaville.com
+  - host: data-platform.morningstareng.com
     http:
       paths:
       - path: /
