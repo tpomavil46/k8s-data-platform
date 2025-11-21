@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/unitycatalog/unitycatalog.git
-    targetRevision: v0.3.0
-    path: helm
+    repoURL: https://github.com/tpomavil46/k8s-data-platform.git
+    targetRevision: main
+    path: charts/unity-catalog
     helm:
       values: |
         server:
