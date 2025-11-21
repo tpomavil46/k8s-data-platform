@@ -33,6 +33,69 @@ spec:
           {{- end }}
           image: "{{ .Values.ui.deployment.initContainer.image.repository }}:{{ .Values.ui.deployment.initContainer.image.tag }}"
           imagePullPolicy: {{ .Values.ui.deployment.initContainer.image.pullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |-
+              until nc -z {{ include "unitycatalog.server.fullname" . }} {{ .Values.server.service.port }}
+              do
+                echo "Waiting for server ({{ include "unitycatalog.server.fullname" . }}:{{ .Values.server.service.port }}) to be ready..."
+                sleep 2
+              done
+      {{- with .Values.ui.deployment.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ui
+          {{- with .Values.ui.deployment.securityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.ui.deployment.image.repository }}:{{ .Values.ui.deployment.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ui.deployment.image.pullPolicy | quote }}
+          ports:
+            - name: ui
+              containerPort: {{ .Values.ui.deployment.port }}
+              protocol: TCP
+
+          {{- if .Values.ui.deployment.enableLivenessProbe }}
+          {{- if .Values.ui.deployment.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}
+          {{- else }}
+          livenessProbe:
+            tcpSocket:
+              port: ui
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30 # 5 minutes
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.ui.deployment.enableReadinessProbe }}
+          {{- if .Values.ui.deployment.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}
+          {{- else }}
+          readinessProbe:
+            tcpSocket:
+              port: ui
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30 # 5 minutes
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.ui.deployment.enableStartupProbe }}
+          {{- if .Values.ui.deployment.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}
+          {{- else }}
+          startupProbe:
+            tcpSocket:
+              port: ui
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30 # 5 minutes
+          {{- end }}
+          {{- end }}
+
           env:
           {{- if .Values.auth.enabled }}
             - name: REACT_APP_GOOGLE_AUTH_ENABLED
