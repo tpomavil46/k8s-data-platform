@@ -47,44 +47,11 @@ spec:
           credentials:
             s3:
               - bucketPath: s3://unity-catalog
-                region: us-east-1  # MinIO doesn't care but required field
+                region: us-east-1
                 credentialsSecretName: unity-catalog-minio-credentials
         
         ui:
           enabled: false
-          deployment:
-            image:
-              repository: ghcr.io/tpomavil46/unity-catalog-ui
-              tag: "0.3.0"
-              pullPolicy: Always
-            port: 80
-            replicaCount: 1
-            resources:
-              requests:
-                memory: "128Mi"
-                cpu: "50m"
-              limits:
-                memory: "256Mi"
-                cpu: "200m"
-            
-            # Override the container to not use bash (nginx doesn't have it)
-            extraContainers:
-              - name: ui
-                image: ghcr.io/tpomavil46/unity-catalog-ui:0.3.0
-                imagePullPolicy: Always
-                ports:
-                  - containerPort: 80
-                    name: ui
-                # Let nginx run its default CMD - don't override
-                command: []
-                args: []
-          
-          service:
-            type: ClusterIP
-            port: 80
-          
-          proxyApiRequests: false
-          serverUrl: ""
         
         ingress:
           enabled: true
@@ -95,7 +62,7 @@ spec:
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
         
         auth:
-          enabled: false  # Start without auth, add later
+          enabled: false
   
   destination:
     server: https://kubernetes.default.svc
