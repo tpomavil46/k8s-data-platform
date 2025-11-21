@@ -51,7 +51,7 @@ spec:
                 credentialsSecretName: unity-catalog-minio-credentials
         
         ui:
-          enabled: false
+          enabled: true
         
         ingress:
           enabled: true
