@@ -1,4 +1,4 @@
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: unity-catalog-minio-credentials
@@ -6,8 +6,8 @@ metadata:
 spec:
   refreshInterval: 1h
   secretStoreRef:
-    name: vault-backend
-    kind: SecretStore
+    name: vault
+    kind: ClusterSecretStore
   target:
     name: unity-catalog-minio-credentials
     creationPolicy: Owner
@@ -18,5 +18,5 @@ spec:
         property: accessKey
     - secretKey: secretKey
       remoteRef:
-        key: secret/unity-catalog/minio
+        key: kv/unity-catalog/minio
         property: secretKey

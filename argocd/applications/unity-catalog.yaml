@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/unitycatalog/unitycatalog.git
-    targetRevision: v0.2.0
+    targetRevision: v0.3.0
     path: helm
     helm:
       values: |
