@@ -91,9 +91,8 @@ spec:
           host: unitycatalog.tpomaville.com
           ingressClassName: nginx
           annotations:
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-            nginx.ingress.kubernetes.io/ssl-redirect: "true"
-          tlsSecretName: unity-catalog-tls
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
         
         auth:
           enabled: false  # Start without auth, add later
