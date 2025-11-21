@@ -57,7 +57,6 @@ spec:
             - "-c"
             - "npm install && npm run build && /usr/sbin/nginx -g 'daemon off;'"
           deployment:
-            command: ["/bin/sh", "-c", "npm run build && nginx -g 'daemon off;'"]
             replicaCount: 1
             resources:
               requests:
