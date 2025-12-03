@@ -4,7 +4,7 @@ metadata:
   name: kafka-producer
   namespace: streaming-demo
 spec:
-  replicas: 1  # Start with 0, scale to 1 when you want to demo
+  replicas: 0  # Start with 0, scale to 1 when you want to demo
   selector:
     matchLabels:
       app: kafka-producer
