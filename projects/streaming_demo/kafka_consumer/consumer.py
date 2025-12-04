@@ -2,6 +2,7 @@ from kafka import KafkaConsumer
 import json
 import psycopg2
 import os
+import traceback
 
 # Note: No need for dotenv in containerized environment - K8s injects env vars directly
 
@@ -46,17 +47,24 @@ consumer = KafkaConsumer(
 print(f"Consuming messages from {KAFKA_TOPIC} on {KAFKA_BOOTSTRAP_SERVERS} and writing to Postgres...")
 
 for message in consumer:
-    event = message.value
-    user_id = event['user_id']
-    event_type = event['event_type']
+    try:
+        event = message.value
+        user_id = event['user_id']
+        event_type = event['event_type']
+        
+        # Upsert into Postgres
+        cur.execute("""
+            INSERT INTO streaming.user_events (user_id, event_type, event_count)
+            VALUES (%s, %s, 1)
+            ON CONFLICT (user_id, event_type)
+            DO UPDATE SET event_count = streaming.user_events.event_count + 1
+        """, (user_id, event_type))
+        
+        conn.commit()
+        print(f"Processed: user {user_id}, event {event_type}")
     
-    # Upsert into Postgres
-    cur.execute("""
-        INSERT INTO streaming.user_events (user_id, event_type, event_count)
-        VALUES (%s, %s, 1)
-        ON CONFLICT (user_id, event_type)
-        DO UPDATE SET event_count = streaming.user_events.event_count + 1
-    """, (user_id, event_type))
-    
-    conn.commit()
-    print(f"Processed: user {user_id}, event {event_type}")
+    except Exception as e:
+        print(f"ERROR processing message: {e}")
+        print(f"Full traceback: {traceback.format_exc()}")
+        print(f"Event data: {event}")
+        conn.rollback()  # Rollback failed transaction
