@@ -23,7 +23,7 @@ metadata:
   namespace: default
 subsets:
   - addresses:
-    - ip: 172.16.0.20
+    - ip: 172.16.0.231
     ports:
     - name: api
       port: 9000
